@@ -8,6 +8,14 @@ public class AnswerCsvConverter extends AbstractCsvConverter {
     @Override
     public Object convertToRead(String value) {
         var valueArr = value.split("%");
-        return new Answer(valueArr[0], Boolean.parseBoolean(valueArr[1]));
+
+        // Мы не будем тут использовать Boolean.parseBoolean(), потому что он парсит нестрого (svperchenko)
+        if ("true".equalsIgnoreCase(valueArr[1])) {
+            return new Answer(valueArr[0], true);
+        } else if ("false".equalsIgnoreCase(valueArr[1])) {
+            return new Answer(valueArr[0], false);
+        } else {
+            throw new IllegalArgumentException("The provided value is not Boolean: " + valueArr[1]);
+        }
     }
 }

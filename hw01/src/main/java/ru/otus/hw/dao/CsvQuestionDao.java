@@ -22,7 +22,7 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        try (Reader reader = getQuestionStorageReader(fileNameProvider.getTestFileName())) {
+        try (Reader reader = getQuestionStorageReader(fileNameProvider.testFileName())) {
             return new CsvToBeanBuilder<QuestionDto>(reader)
                     .withType(QuestionDto.class)
                     .withSeparator(';')

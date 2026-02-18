@@ -1,10 +1,14 @@
 package ru.otus.hw.config;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public record AppProperties(String testFileName) implements TestFileNameProvider {
 
-@AllArgsConstructor
-@Data
-public class AppProperties implements TestFileNameProvider {
-    private String testFileName;
+    public AppProperties {
+        if (testFileName == null) {
+            throw new IllegalArgumentException("Test file name must not be NULL");
+        } else if (testFileName.isBlank()) {
+            throw new IllegalArgumentException("Test file name must not be empty or blank");
+        } else if (testFileName.contains(" ")) {
+            throw new IllegalArgumentException("Test file name must not be multiple words");
+        }
+    }
 }
