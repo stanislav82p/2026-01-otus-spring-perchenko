@@ -1,12 +1,14 @@
 package ru.otus.hw.service.mix;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.random.RandomGenerator;
 
+@Component
 @RequiredArgsConstructor
 public class RandomEntityMixer implements EntityMixer {
     private final RandomGenerator rnd;

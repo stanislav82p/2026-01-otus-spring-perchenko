@@ -1,6 +1,7 @@
 package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.domain.Student;
@@ -8,6 +9,7 @@ import ru.otus.hw.domain.TestResult;
 import ru.otus.hw.service.io.IOService;
 import ru.otus.hw.service.mix.EntityMixer;
 
+@Service
 @RequiredArgsConstructor
 public class TestServiceImpl implements TestService {
     public static final String TRY_AGAIN_MESSAGE_TEMPLATE = "Вы должны ввести значение от %d до %d включительно.";
