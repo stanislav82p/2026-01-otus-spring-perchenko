@@ -47,7 +47,7 @@ public class CsvQuestionDao implements QuestionDao {
     private Reader getQuestionStorageReader(String fileName) throws QuestionReadException {
         InputStream is = getClass().getClassLoader().getResourceAsStream(fileName);
         if (is == null) {
-            throw new QuestionReadException("CsvQuestionDao.no.questionsfile");
+            throw new QuestionReadException(resources.getMessage("CsvQuestionDao.no.questionsfile"));
         } else {
             return new InputStreamReader(is);
         }
