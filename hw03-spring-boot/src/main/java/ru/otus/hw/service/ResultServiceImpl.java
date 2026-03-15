@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.config.TestConfig;
 import ru.otus.hw.domain.TestResult;
+import ru.otus.hw.service.io.LocalizedIOService;
 
 @Service
 @RequiredArgsConstructor
@@ -20,14 +21,14 @@ public class ResultServiceImpl implements ResultService {
         ioService.printFormattedLineLocalized("ResultService.student",
                 testResult.getStudent().getFullName());
         ioService.printFormattedLineLocalized("ResultService.answered.questions.count",
-                testResult.getAnsweredQuestions().size());
+                testResult.getNumAnsweredQuestions());
         ioService.printFormattedLineLocalized("ResultService.right.answers.count",
-                testResult.getRightAnswersCount());
+                testResult.getNumRightAnsweredQuestions());
 
-        if (testResult.getRightAnswersCount() >= testConfig.getRightAnswersCountToPass()) {
+        if (testResult.getNumRightAnsweredQuestions() >= testConfig.getRightAnswersCountToPass()) {
             ioService.printLineLocalized("ResultService.passed.test");
             return;
         }
-        ioService.printLineLocalized("ResultService.fail.test");
+        ioService.printFormattedLineLocalized("ResultService.fail.test", testConfig.getRightAnswersCountToPass());
     }
 }

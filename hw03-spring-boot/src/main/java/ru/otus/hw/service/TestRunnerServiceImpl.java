@@ -17,6 +17,8 @@ public class TestRunnerServiceImpl implements TestRunnerService {
     public void run() {
         var student = studentService.determineCurrentStudent();
         var testResult = testService.executeTestFor(student);
-        resultService.showResult(testResult);
+        if (testResult.isTestRun()) {
+            resultService.showResult(testResult);
+        }
     }
 }
