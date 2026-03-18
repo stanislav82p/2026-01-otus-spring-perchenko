@@ -1,0 +1,7 @@
+# Добавить сюда своих вопросов. Эту строку надо пропустить при настройке CsvToBean (withSkipLines)
+{0} Есть ли жизнь на Марсе?;Это науке пока не известно%true|Конечно. Красные (НЛО) это с Марса. А зеленые (НЛО) с Венеры%false|Точно нет%false
+{1} Как нужно загружать ресурс из jar в Java?;ClassLoader#geResourceAsStream или ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
+{2} Какой предпочтительный способ реакции на исключения?;@SneakyThrow%false|e.printStackTrace()%false|Проброс дальше с предварительным оборачиванием в бизнес-исключение (например, QuestionReadException)%true|Игнорирование исключения%false
+{3} Есть ли у Kotlin примитивные типы данных, такие как int, long, float?;Нет, Kotlin не имеет и не использует примитивные типы данных.%false|Нет, не на уровне языка. Но компилятор Kotlin использует примитивы JVM для лучшей производительности.%true|Да, но Kotlin всегда конвертирует их в не примитивные аналоги.%false|Да, Kotlin в этом отношении похож на Java.%false
+{4} Что такое to в приведенном ниже примере: val test = 33 to 42?;Инфиксная функция, создающая пару (33, 42)%true|Ключевое слово Kotlin для создания пары (33, 42)%false|Ключевое слово для создания диапазона от 33 до 42%false|Опечатка%false
+{5} Какое из объявлений функций является валидным?;int sum(int a, int b)%false|int sum(a: Int, b: Int)%false|function sum(a: Int, b: Int): Int%false|fun sum(a: Int, b: Int): Int%true
