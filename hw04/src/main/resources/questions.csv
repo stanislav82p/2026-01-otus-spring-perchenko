@@ -1,0 +1,7 @@
+# Добавить сюда своих вопросов. Эту строку надо пропустить при настройке CsvToBean (withSkipLines)
+{0} Is there life on Mars?;Science doesn't know this yet%true|Certainly. The red UFO is from Mars. And green is from Venus%false|Absolutely not%false
+{1} How should resources be loaded form jar in Java?;ClassLoader#geResourceAsStream or ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
+{2} Which option is a good way to handle the exception?;@SneakyThrow%false|e.printStackTrace()%false|Rethrow with wrapping in business exception (for example, QuestionReadException)%true|Ignoring exception%false
+{3} Does Kotlin have primitive data types like int, long, float?;No, Kotlin does not have or use primitive data types.%false|No, not at the language level. But the Kotlin compiler uses JVM primitives for better performance.%true|Yes, but Kotlin always converts them to non-primitive equivalents.%false|Yes, Kotlin is similar to Java in this regard.%false
+{4} What is the 'to' in the next example: val test = 33 to 42?;Infix function, which creates a pair: (33, 42)%true|Kotlin key word to create a pair (33, 42)%false|Key word to create a range from 33 to 42%false|Typo%false
+{5} Which of the following function declarations is valid?;int sum(int a, int b)%false|int sum(a: Int, b: Int)%false|function sum(a: Int, b: Int): Int%false|fun sum(a: Int, b: Int): Int%true
