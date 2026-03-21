@@ -6,7 +6,7 @@ import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
-import ru.otus.hw.exceptions.QuestionReadException;
+import ru.otus.hw.exceptions.NotLoggedInException;
 import ru.otus.hw.service.io.LocalizedIOService;
 import ru.otus.hw.service.localization.LocalizedMessagesService;
 import ru.otus.hw.service.mix.EntityMixer;
@@ -27,24 +27,22 @@ public class TestServiceImpl implements TestService {
 
     @Override
     public TestResult executeTestFor(Student student) {
+        if (student == null) {
+            throw new NotLoggedInException();
+        }
+
         var testResult = new TestResult(student);
-        try {
-            List<Question> questions = questionDao.findAll();
-            var mixedQuestion = entityMixer.mixEntityList(questions);
+        List<Question> questions = questionDao.findAll();
+        var mixedQuestion = entityMixer.mixEntityList(questions);
 
-            ioService.printLine("");
-            ioService.printLineLocalized("TestService.answer.the.questions");
-            ioService.printLine("");
+        ioService.printLine("");
+        ioService.printLineLocalized("TestService.answer.the.questions");
+        ioService.printLine("");
 
-            int index = 0;
-            for (Question question: mixedQuestion) {
-                askQuestion(question, ++ index, questions.size());
-                getAnswer(question, testResult);
-            }
-            testResult.setTestRun(true);
-        } catch (QuestionReadException e) {
-            testResult.setTestRun(false);
-            ioService.printFormattedLineLocalized("TestServiceImpl.questions.not.loaded", e.getMessage());
+        int index = 0;
+        for (Question question: mixedQuestion) {
+            askQuestion(question, ++ index, questions.size());
+            getAnswer(question, testResult);
         }
         return testResult;
     }

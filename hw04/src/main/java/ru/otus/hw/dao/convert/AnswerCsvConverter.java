@@ -1,8 +1,10 @@
 package ru.otus.hw.dao.convert;
 
 import com.opencsv.bean.AbstractCsvConverter;
+import org.springframework.stereotype.Component;
 import ru.otus.hw.domain.Answer;
 
+@Component
 public class AnswerCsvConverter extends AbstractCsvConverter {
 
     @Override

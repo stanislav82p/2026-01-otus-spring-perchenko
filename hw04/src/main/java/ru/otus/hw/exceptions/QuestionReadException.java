@@ -1,8 +1,6 @@
 package ru.otus.hw.exceptions;
 
-import java.io.IOException;
-
-public class QuestionReadException extends IOException {
+public class QuestionReadException extends RuntimeException {
     public QuestionReadException(String message, Throwable ex) {
         super(message, ex);
     }

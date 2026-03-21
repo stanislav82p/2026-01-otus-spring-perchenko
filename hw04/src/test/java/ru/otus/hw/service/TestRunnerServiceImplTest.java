@@ -1,81 +1,66 @@
 package ru.otus.hw.service;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
-import ru.otus.hw.utils.QuestionTestDataProvider;
+import ru.otus.hw.exceptions.NotLoggedInException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+@DisplayName("Тест сервиса запуска тестирования: TestRunnerServiceImpl")
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class TestRunnerServiceImplTest {
 
-    @Mock
-    private StudentService studentService;
+    @MockitoBean
+    private StudentService mockedStudentService;
 
-    @Mock
-    private TestService testService;
+    @MockitoBean
+    private TestService mockedTestService;
 
-    @Mock
-    private ResultService resultService;
+    @MockitoBean
+    private ResultService mockedResultService;
 
-    private AutoCloseable mocks;
+    @MockitoSpyBean
+    private TestRunnerService testRunnerService;
 
-    @BeforeEach
-    void setUp() {
-        mocks = MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        mocks.close();
-    }
-
-    @DisplayName("Проверить сценарий выполнения тестирования")
+    @DisplayName("Должен выполнять тестирование когда залогинен")
     @Test
-    void mustExecuteTestScenario() {
-        var testStudent = new Student("Stanislav", "Perchenko");
-        var testResult  = buildDemoTestResult(testStudent);
+    void mustExecuteTestScenarioWhenLoggedIn() {
+        var student = new Student("Stanislav", "Perchenko");
+        var result  = new TestResult(student);
+        given(mockedStudentService.isLoggedIn()).willReturn(true);
+        given(mockedStudentService.getCurrentStudent()).willReturn(student);
+        given(mockedTestService.executeTestFor(any())).willReturn(result);
 
-        BDDMockito.given(studentService.determineCurrentStudent()).willReturn(testStudent);
-        BDDMockito.given(testService.executeTestFor(testStudent)).willReturn(testResult);
+        testRunnerService.run();
 
-        TestRunnerService runnerService = new TestRunnerServiceImpl(testService, studentService, resultService);
-        runnerService.run();
-
-        BDDMockito.verify(studentService, Mockito.times(1)).determineCurrentStudent();
-        BDDMockito.verify(testService, Mockito.times(1)).executeTestFor(testStudent);
-        BDDMockito.verify(resultService, Mockito.times(1)).showResult(testResult);
+        verify(mockedStudentService, times(1)).isLoggedIn();
+        verify(mockedStudentService, times(1)).getCurrentStudent();
+        verify(mockedTestService, times(1)).executeTestFor(student);
+        verify(mockedResultService, times(1)).showResult(result);
     }
 
-    @DisplayName("Проверить сценарий если тесмтирование не выполняется")
+    @DisplayName("Должен выбрасывать исключение когда НЕ залогинен")
     @Test
-    void mustNotExecuteResultIfError() {
-        var testStudent = new Student("Stanislav", "Perchenko");
-        var testResult = new TestResult(testStudent);
-        testResult.setTestRun(false);
+    void mustThrowExceptionWhenNotLoggedIn() {
+        given(mockedStudentService.isLoggedIn()).willReturn(false);
 
-        BDDMockito.given(studentService.determineCurrentStudent()).willReturn(testStudent);
-        BDDMockito.given(testService.executeTestFor(testStudent)).willReturn(testResult);
+        var exception = assertThrows(
+                NotLoggedInException.class,
+                testRunnerService::run
+        );
 
-        TestRunnerService runnerService = new TestRunnerServiceImpl(testService, studentService, resultService);
-        runnerService.run();
-
-        BDDMockito.verify(studentService, Mockito.times(1)).determineCurrentStudent();
-        BDDMockito.verify(testService, Mockito.times(1)).executeTestFor(testStudent);
-        BDDMockito.verify(resultService, Mockito.times(0)).showResult(testResult);
-    }
-
-    private TestResult buildDemoTestResult(Student stud) {
-        var questions = QuestionTestDataProvider.buildExpectedQuestions();
-        var result = new TestResult(stud);
-        result.applyAnswer(questions.get(0), false);
-        result.applyAnswer(questions.get(1), true);
-        result.setTestRun(true);
-        return result;
+        Assertions.assertThat(exception.getMessage()).isNull();
     }
 }

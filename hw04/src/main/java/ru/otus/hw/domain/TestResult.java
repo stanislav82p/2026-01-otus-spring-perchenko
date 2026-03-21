@@ -1,7 +1,6 @@
 package ru.otus.hw.domain;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
@@ -12,10 +11,6 @@ public class TestResult {
 
     @Getter
     private final Student student;
-
-    @Getter
-    @Setter
-    private boolean isTestRun;
 
     private final List<Entry<Question, Boolean>> answeredQuestions;
 
