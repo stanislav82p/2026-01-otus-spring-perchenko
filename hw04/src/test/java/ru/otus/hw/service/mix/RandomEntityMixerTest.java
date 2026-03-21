@@ -2,6 +2,16 @@ package ru.otus.hw.service.mix;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 import java.util.random.RandomGenerator;
@@ -9,15 +19,47 @@ import java.util.random.RandomGenerator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class RandomEntityMixerTest {
+
+    @Configuration
+    @ComponentScan("ru.otus.hw.service.mix")
+    static class NestedConfig {
+
+        @Bean("randomGenerator")
+        // Этот мок можно использовать только 1 раз. Поэтому PROTOTYPE
+        @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+        RandomGenerator getMockedRandomGenerator() {
+            System.out.println("get random!!!");
+            return new RandomGenerator() {
+                private final int[] data = {1, 7, 6, 0, 4, 2, 2, 0};
+                private int index = 0;
+                @Override
+                public int nextInt(int bound) {
+                    return data[index++];
+                }
+
+                @Override
+                public long nextLong() {
+                    return 0;
+                }
+            };
+        }
+    }
+
+    @Autowired
+    private EntityMixer mixerToTest;
+
+    @Autowired
+    private ApplicationContext context;
 
     @DisplayName("Выход должен содержать все элементы входа")
     @Test
     void mustContainAllItems() {
         List<Integer> source = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        var mixer = new RandomEntityMixer(new Random());
-        var mixed = mixer.mixEntityList(source);
+        var mixed = mixerToTest.mixEntityList(source);
         assertEquals(mixed.size(), source.size());
 
         Set<Integer> mixedItems = new HashSet<>();
@@ -33,10 +75,10 @@ public class RandomEntityMixerTest {
     @Test
     void mustMixInCorrectOrder() {
         List<Integer> testData = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
-        List<Integer> mixedDataReference = mixTestData(testData, getMockedRandomGenerator());
+        var rnd = context.getBean(RandomGenerator.class);
+        List<Integer> mixedDataReference = mixTestData(testData, rnd);
 
-        var mixer = new RandomEntityMixer(getMockedRandomGenerator());
-        var mixed = mixer.mixEntityList(testData);
+        var mixed = mixerToTest.mixEntityList(testData);
 
         assertEquals(mixed, mixedDataReference);
     }
@@ -51,21 +93,5 @@ public class RandomEntityMixerTest {
         }
         result.add(workList.get(0));
         return result;
-    }
-
-    private RandomGenerator getMockedRandomGenerator() {
-        return new RandomGenerator() {
-            private final int[] data = {1, 7, 6, 0, 4, 2, 2, 0};
-            private int index = 0;
-            @Override
-            public int nextInt(int bound) {
-                return data[index++];
-            }
-
-            @Override
-            public long nextLong() {
-                return 0;
-            }
-        };
     }
 }

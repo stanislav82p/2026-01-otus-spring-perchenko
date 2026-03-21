@@ -3,8 +3,10 @@ package ru.otus.hw;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.shell.command.annotation.CommandScan;
 import ru.otus.hw.config.AppProperties;
 
+@CommandScan
 @EnableConfigurationProperties(AppProperties.class)
 @SpringBootApplication
 public class Application {

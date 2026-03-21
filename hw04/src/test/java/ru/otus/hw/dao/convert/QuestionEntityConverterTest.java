@@ -1,8 +1,10 @@
 package ru.otus.hw.dao.convert;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
@@ -14,13 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
+@SpringBootTest
+@ContextConfiguration(classes = QuestionEntityConverter.class)
 public class QuestionEntityConverterTest {
-    private EntityConverter<QuestionDto, Question> converter;
 
-    @BeforeEach
-    void setUp() {
-        converter = new QuestionEntityConverter();
-    }
+    @Autowired
+    private EntityConverter<QuestionDto, Question> converter;
 
     @DisplayName("должен выбрасывать исключение, если на входже NULL")
     @Test

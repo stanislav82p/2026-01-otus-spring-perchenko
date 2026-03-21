@@ -1,20 +1,36 @@
 package ru.otus.hw.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.domain.Student;
-import ru.otus.hw.service.io.LocalizedIOService;
 
 @Service
-@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
-    private final LocalizedIOService ioService;
+    private Student currentStudent;
 
     @Override
-    public Student determineCurrentStudent() {
-        var firstName = ioService.readStringWithPromptLocalized("StudentService.input.first.name");
-        var lastName = ioService.readStringWithPromptLocalized("StudentService.input.last.name");
-        return new Student(firstName, lastName);
+    public synchronized Student login(String firstName, String secondName) {
+        return currentStudent = new Student(firstName, secondName);
+    }
+
+    @Override
+    public synchronized Student logout() {
+        if (currentStudent != null) {
+            var stud = currentStudent;
+            currentStudent = null;
+            return stud;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public synchronized boolean isLoggedIn() {
+        return currentStudent != null;
+    }
+
+    @Override
+    public synchronized Student getCurrentStudent() {
+        return currentStudent;
     }
 }
