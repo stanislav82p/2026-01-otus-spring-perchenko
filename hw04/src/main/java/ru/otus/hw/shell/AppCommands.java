@@ -28,11 +28,14 @@ public class AppCommands {
 
     @ShellMethod(value = "Login command", key = "login")
     public String logIn(
-            @ShellOption(value = { "--first-name", "-f" }, help = "Имя (только буквы, от 3 символов)")
+            @ShellOption(value = { "--first-name", "-f" }, help = "Имя (только буквы, от 3 символов, с большой буквы)")
             @Pattern(regexp = "^(?:[A-Z][a-z]{2,}|[А-ЯЁ][а-яё]{2,})$")
             String firstName,
 
-            @ShellOption(value = { "--last-name",  "-l" }, help = "Фамилия (только буквы, от 3 символов)")
+            @ShellOption(
+                    value = { "--last-name",  "-l" },
+                    help = "Фамилия (только буквы, от 3 символов, с большой буквы)"
+            )
             @Pattern(regexp = "^(?:[A-Z][a-z]{2,}|[А-ЯЁ][а-яё]{2,})$")
             String lastName
     ) {
