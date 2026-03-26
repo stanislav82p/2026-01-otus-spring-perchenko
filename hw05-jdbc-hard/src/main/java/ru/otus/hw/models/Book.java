@@ -1,14 +1,16 @@
 package ru.otus.hw.models;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.With;
 
-import java.util.List;
+import java.util.Set;
 
-@Data
 @AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@With
+@Builder
 public class Book {
     private long id;
 
@@ -16,5 +18,5 @@ public class Book {
 
     private Author author;
 
-    private List<Genre> genres;
+    private Set<Genre> genres;
 }
