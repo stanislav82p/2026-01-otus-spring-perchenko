@@ -1,0 +1,9 @@
+spring:
+  shell:
+    interactive:
+      enabled: false
+  main:
+    allow-circular-references: true
+test:
+  rightAnswersCountToPass: 3
+  locale: en-US
