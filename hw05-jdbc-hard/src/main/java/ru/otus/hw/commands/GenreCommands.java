@@ -20,6 +20,7 @@ public class GenreCommands {
     public String findAllGenres() {
         return genreService.findAll().stream()
                 .map(genreConverter::genreToString)
-                .collect(Collectors.joining("," + System.lineSeparator()));
+                .collect(Collectors.joining("," + System.lineSe
+                        parator()));
     }
 }
