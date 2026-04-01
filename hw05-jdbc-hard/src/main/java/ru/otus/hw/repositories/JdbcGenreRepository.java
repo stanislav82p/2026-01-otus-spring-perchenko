@@ -31,7 +31,7 @@ public class JdbcGenreRepository implements GenreRepository {
 
     @Override
     public List<Genre> findAll() {
-        var sql = "SELECT %1$s, %2$s FROM %3$s ORDER BY %2$s ASC".formatted(ID, NAME, TABLE_NAME);
+        var sql = "SELECT %1$s, %2$s FROM %3$s".formatted(ID, NAME, TABLE_NAME);
         return namedParamJdbc.query(sql, new GenreRowMapper());
     }
 

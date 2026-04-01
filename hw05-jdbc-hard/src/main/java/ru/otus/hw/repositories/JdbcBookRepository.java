@@ -123,7 +123,7 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private List<Book> getAllBooksWithoutGenres() {
-        var sql = "SELECT %1$s, %2$s, %3$s FROM %4$s ORDER BY %2$s ASC".formatted(ID, TITLE, AUTHOR_ID, TABLE_NAME);
+        var sql = "SELECT %1$s, %2$s, %3$s FROM %4$s".formatted(ID, TITLE, AUTHOR_ID, TABLE_NAME);
         List<Book> rawBooks = namedParamJdbc.query(sql, new BookRowMapper());
 
         // Если у нас в базе есть авторы без книг, то мы не будем тянуть лишних авторов

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import ru.otus.hw.converters.AuthorConverter;
 import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.converters.GenreConverter;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Репозиторий на основе Jdbc для работы с книгами ")
 @JdbcTest
@@ -178,6 +180,17 @@ class JdbcBookRepositoryTest {
                 .get()
                 .usingRecursiveComparison()
                 .isEqualTo(expectedBook);
+    }
+
+    @DisplayName("должен выбрасывать исключение при попытке обновить несуществующую книгу")
+    @Test
+    void mustThrowExceptionOnUpdateNonExistedBook() {
+        Book book = new Book(100500L, "BookTitle_10500", dbAuthors.get(2),
+                Set.of(dbGenres.get(4), dbGenres.get(5)));
+
+        assertThatThrownBy(() -> bookRepo.save(book))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Не найдена книга с ID = 100500");
     }
 
     @DisplayName("должен удалять книгу по id ")

@@ -32,7 +32,7 @@ public class JdbcAuthorRepository implements AuthorRepository {
 
     @Override
     public List<Author> findAll() {
-        var sql = "SELECT %1$s, %2$s FROM %3$s ORDER BY %2$s ASC".formatted(ID, FULL_NAME, TABLE_NAME);
+        var sql = "SELECT %1$s, %2$s FROM %3$s".formatted(ID, FULL_NAME, TABLE_NAME);
         return namedParamJdbc.query(sql, new AuthorRowMapper());
     }
 
