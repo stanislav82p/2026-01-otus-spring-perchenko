@@ -83,6 +83,8 @@
                 </dependencies>
                 <configuration>
                     <configLocation>${checkstyle.config.url}</configLocation>
+                    <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+                    <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                 </configuration>
                 <executions>
                     <execution>
