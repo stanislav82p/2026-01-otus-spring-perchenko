@@ -20,8 +20,5 @@ public class Application {
 		tester.checkGenre(context);
 		tester.checkBooks(context);*/
 	}
-
-
-
 }
 

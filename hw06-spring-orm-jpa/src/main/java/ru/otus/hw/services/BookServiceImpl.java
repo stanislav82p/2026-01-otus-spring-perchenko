@@ -24,26 +24,43 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    @Transactional
     @Override
     public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+        var optBook = bookRepository.findById(id);
+
+        // !!! Пинаю лэйзи-коллекцию, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        optBook.ifPresent(it -> it.getGenres().isEmpty());
+
+        return optBook;
     }
 
+    @Transactional
     @Override
     public List<Book> findAll() {
-        return bookRepository.findAll();
+        List<Book> books = bookRepository.findAll();
+
+        // !!! Пинаю лэйзи-коллекцию, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        books.forEach(it -> it.getGenres().isEmpty());
+
+        return books;
     }
 
+    @Transactional
     @Override
     public Book insert(String title, long authorId, Set<Long> genresIds) {
         return save(0, title, authorId, genresIds);
     }
 
+    @Transactional
     @Override
     public Book update(long id, String title, long authorId, Set<Long> genresIds) {
         return save(id, title, authorId, genresIds);
     }
 
+    @Transactional
     @Override
     public void deleteById(long id) {
         bookRepository.deleteById(id);

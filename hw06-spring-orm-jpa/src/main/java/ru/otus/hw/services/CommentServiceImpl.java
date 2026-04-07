@@ -13,6 +13,7 @@ import ru.otus.hw.repositories.ReaderRepository;
 import ru.otus.hw.utils.EntityId;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -26,13 +27,41 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
+    public Optional<Comment> findById(EntityId<Comment> commentId) {
+        var comment = commentRepo.findById(commentId.id);
+
+        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        comment.ifPresent(it -> it.getBook().getGenres().isEmpty());
+
+        return comment;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public  List<Comment> findAll() {
+        var comments = commentRepo.findAll();
+
+        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        comments.forEach(it -> it.getBook().getGenres().isEmpty());
+        return comments;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<Comment> findAllForBook(EntityId<Book> bookId) {
         var book = bookRepo.findById(bookId.id);
         if (book.isEmpty()) {
             throw new EntityNotFoundException("The book with ID %s was not found".formatted(bookId));
         }
 
-        return commentRepo.findAllForBook(bookId.id);
+        var comments = commentRepo.findAllForBook(bookId.id);
+
+        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        comments.forEach(it -> it.getBook().getGenres().isEmpty());
+        return comments;
     }
 
     @Transactional(readOnly = true)
@@ -46,7 +75,12 @@ public class CommentServiceImpl implements CommentService {
                 () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
         );
 
-        return commentRepo.findAllFromReaderForBook(reader, book);
+        var comments = commentRepo.findAllFromReaderForBook(reader, book);
+
+        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        comments.forEach(it -> it.getBook().getGenres().isEmpty());
+        return comments;
     }
 
     @Transactional
@@ -72,7 +106,12 @@ public class CommentServiceImpl implements CommentService {
                 () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
         );
 
-        return commentRepo.createComment(book, reader, text);
+        var comment = commentRepo.createComment(book, reader, text);
+
+        // !!! Пинаю лэйзи-коллекцию на втором уровнре, чтобы загрузилась.
+        // Просто транзакция не помогает. ХЗ как сделать правильно
+        comment.getBook().getGenres().isEmpty();
+        return comment;
     }
 
     @Transactional

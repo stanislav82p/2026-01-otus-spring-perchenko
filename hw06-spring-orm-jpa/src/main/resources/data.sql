@@ -17,6 +17,8 @@ insert into readers(full_name)
 values ('Reader_1'), ('Reader_2'), ('Reader_3'), ('Reader_4');
 
 insert into comments(book_id, reader_id, text, comment_date)
-values (1, 1, 'comment-1-1', '2000-03-22'), (1, 2, 'comment-1-2', '2000-04-22'),
-       (1, 3, 'comment-1-3', '2000-05-22'), (2, 3, 'comment-2-3', '2000-06-22'),
+values (1, 1, 'comment-1-1', '2000-03-22'),
+       (1, 2, 'comment-1-2', '2000-04-22'),
+       (1, 3, 'comment-1-3', '2000-05-22'),
+       (2, 3, 'comment-2-3', '2000-06-22'),
        (2, 1, 'comment-2-4', '2001-03-22');

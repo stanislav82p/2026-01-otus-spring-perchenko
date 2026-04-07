@@ -6,8 +6,13 @@ import ru.otus.hw.models.Reader;
 import ru.otus.hw.utils.EntityId;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CommentService {
+
+    Optional<Comment> findById(EntityId<Comment> commentId);
+
+    List<Comment> findAll();
 
     List<Comment> findAllForBook(EntityId<Book> bookId);
 
