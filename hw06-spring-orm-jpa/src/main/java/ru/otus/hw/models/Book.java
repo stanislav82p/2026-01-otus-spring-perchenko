@@ -46,7 +46,6 @@ public class Book {
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     private Author author;
 
-    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "books_genres",
             joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
@@ -54,5 +53,6 @@ public class Book {
     )
     @Fetch(FetchMode.SELECT)
     @BatchSize(size = 20)
+    @ManyToMany(fetch = FetchType.LAZY)
     private Set<Genre> genres;
 }

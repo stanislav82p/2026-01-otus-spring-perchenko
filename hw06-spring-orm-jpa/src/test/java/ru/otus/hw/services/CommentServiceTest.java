@@ -85,8 +85,10 @@ public class CommentServiceTest {
 
         var found = commService.findById(EntityId.forValue(createdComm.getId()));
 
-        assertThat(found).isPresent().get().extracting(Comment::getId).isEqualTo(createdComm.getId());
-        assertThat(found).isPresent().get().extracting(Comment::getText).isEqualTo(createdComm.getText());
+        assertThat(found).isPresent().get()
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*hibernate_interceptor")
+                .isEqualTo(createdComm);
     }
 
     @DisplayName("Должен удалять все комментарии читателя")

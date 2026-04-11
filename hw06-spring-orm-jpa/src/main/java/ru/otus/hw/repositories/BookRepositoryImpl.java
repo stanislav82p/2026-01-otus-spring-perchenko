@@ -32,7 +32,8 @@ public class BookRepositoryImpl implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        TypedQuery<Book> query = em.createQuery("SELECT b FROM Book b WHERE b.id = :book_id", Book.class);
+        var jpql = "SELECT b FROM Book b  LEFT JOIN FETCH b.genres WHERE b.id = :book_id";
+        TypedQuery<Book> query = em.createQuery(jpql, Book.class);
         query.setParameter("book_id", id);
         query.setHint(FETCH.getKey(), em.getEntityGraph("book-author-entity-graph"));
         List<Book> result = query.getResultList();
@@ -50,7 +51,7 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public boolean deleteById(long id) {
+    public int deleteById(long id) {
         // У нас в книге нету каментов, поэтому удаляем вручную
         Query query = em.createQuery("DELETE FROM Comment c WHERE c.book.id = :id");
         query.setParameter("id", id);
@@ -58,7 +59,6 @@ public class BookRepositoryImpl implements BookRepository {
 
         query = em.createQuery("DELETE FROM Book b WHERE b.id = :id");
         query.setParameter("id", id);
-        var nDel = query.executeUpdate();
-        return nDel == 1;
+        return query.executeUpdate();
     }
 }
