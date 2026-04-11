@@ -16,6 +16,8 @@ public interface CommentService {
 
     List<Comment> findAllForBook(EntityId<Book> bookId);
 
+    List<Comment> findAllFromReader(EntityId<Reader> readerId);
+
     List<Comment> findAllForBookFromReader(EntityId<Book> bookId, EntityId<Reader> readerId);
 
     boolean deleteById(EntityId<Comment> commentId);

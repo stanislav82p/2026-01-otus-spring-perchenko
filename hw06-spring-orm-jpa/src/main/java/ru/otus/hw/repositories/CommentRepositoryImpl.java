@@ -5,11 +5,13 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Reader;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -30,9 +32,12 @@ public class CommentRepositoryImpl implements CommentRepository {
     @Override
     public List<Comment> findAll() {
         TypedQuery<Comment> query = em.createQuery("SELECT c FROM Comment c", Comment.class);
-
         query.setHint(FETCH.getKey(), em.getEntityGraph("comment-all-depends-entity-graph"));
-        return query.getResultList();
+        List<Comment> comments = query.getResultList();
+
+        List<Author> authors = selectAuthorsForBooksOfComments(comments);
+
+        return comments;
     }
 
     @Override
@@ -60,7 +65,11 @@ public class CommentRepositoryImpl implements CommentRepository {
                 "SELECT c FROM Comment c WHERE c.reader.id = :reader_id", Comment.class);
         query.setParameter("reader_id", readerId);
         query.setHint(FETCH.getKey(), em.getEntityGraph("comment-book-entity-graph"));
-        return query.getResultList();
+        List<Comment> comments = query.getResultList();
+
+        List<Author> authors = selectAuthorsForBooksOfComments(comments);
+
+        return comments;
     }
 
     @Override
@@ -87,11 +96,10 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public boolean deleteById(long commentId) {
+    public int deleteById(long commentId) {
         Query query = em.createQuery("DELETE FROM Comment c WHERE c.id = :id");
         query.setParameter("id", commentId);
-        var nDel = query.executeUpdate();
-        return nDel == 1;
+        return query.executeUpdate();
     }
 
     @Override
@@ -109,5 +117,29 @@ public class CommentRepositoryImpl implements CommentRepository {
         query.setParameter("new_date", new Date(System.currentTimeMillis()));
         var nUpd = query.executeUpdate();
         return nUpd == 1;
+    }
+
+    private List<Author> selectAuthorsForBooksOfComments(List<Comment> comments) {
+        List<Long> authorIds = comments.stream()
+                .map(it -> it.getBook().getAuthor().getId())
+                .distinct()
+                .toList();
+        List<Author> authors = new ArrayList<>(10);
+        // Выбираем в контекст авторов для книг подзапросами по 10 штук
+        while (!authorIds.isEmpty()) {
+            int n = Math.min(authorIds.size(), 10);
+            List<Long> ids = authorIds.subList(0, n);
+            if (authorIds.size() > n) {
+                authorIds = authorIds.subList(n, authorIds.size());
+            } else {
+                authorIds = List.of();
+            }
+
+            TypedQuery<Author> aQuery =
+                    em.createQuery("SELECT a FROM Author a WHERE a.id IN (:author_ids)", Author.class);
+            aQuery.setParameter("author_ids", ids);
+            authors.addAll(aQuery.getResultList());
+        }
+        return authors;
     }
 }

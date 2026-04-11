@@ -27,24 +27,14 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Override
     public Optional<Book> findById(long id) {
-        var optBook = bookRepository.findById(id);
-
-        // !!! Пинаю лэйзи-коллекцию, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        optBook.ifPresent(it -> it.getGenres().isEmpty());
-
-        return optBook;
+        return bookRepository.findById(id);
     }
 
     @Transactional
     @Override
     public List<Book> findAll() {
         List<Book> books = bookRepository.findAll();
-
-        // !!! Пинаю лэйзи-коллекцию, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
         books.forEach(it -> it.getGenres().isEmpty());
-
         return books;
     }
 
@@ -62,8 +52,8 @@ public class BookServiceImpl implements BookService {
 
     @Transactional
     @Override
-    public void deleteById(long id) {
-        bookRepository.deleteById(id);
+    public boolean deleteById(long id) {
+        return bookRepository.deleteById(id) == 1;
     }
 
     @Transactional

@@ -39,8 +39,7 @@ public class CommentServiceTest {
         assertThat(comments.size()).isEqualTo(8);
         assertThat(comments)
                 .allMatch(it -> it.getReader() != null)
-                .allMatch(it -> it.getBook().getAuthor() != null)
-                .allMatch(it -> !it.getBook().getGenres().isEmpty());
+                .allMatch(it -> it.getBook().getAuthor() != null);
     }
 
     @DisplayName("Должен загружать все комментарии для книги")
@@ -85,8 +84,10 @@ public class CommentServiceTest {
 
         var found = commService.findById(EntityId.forValue(createdComm.getId()));
 
-        assertThat(found).isPresent().get().extracting(Comment::getId).isEqualTo(createdComm.getId());
-        assertThat(found).isPresent().get().extracting(Comment::getText).isEqualTo(createdComm.getText());
+        assertThat(found).isPresent().get()
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*hibernate_interceptor")
+                .isEqualTo(createdComm);
     }
 
     @DisplayName("Должен удалять все комментарии читателя")

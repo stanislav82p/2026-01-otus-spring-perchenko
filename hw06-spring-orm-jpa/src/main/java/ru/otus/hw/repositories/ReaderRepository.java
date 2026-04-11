@@ -12,5 +12,4 @@ import java.util.Optional;
 public interface ReaderRepository {
 
     Optional<Reader> findById(long id);
-
 }

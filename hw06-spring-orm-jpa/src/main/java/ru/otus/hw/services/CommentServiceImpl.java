@@ -30,9 +30,10 @@ public class CommentServiceImpl implements CommentService {
     public Optional<Comment> findById(EntityId<Comment> commentId) {
         var comment = commentRepo.findById(commentId.id);
 
-        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        comment.ifPresent(it -> it.getBook().getGenres().isEmpty());
+        comment.ifPresent(it -> {
+            it.getBook().getGenres().isEmpty();
+            it.getBook().getAuthor().getFullName();
+        });
 
         return comment;
     }
@@ -40,12 +41,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     @Override
     public  List<Comment> findAll() {
-        var comments = commentRepo.findAll();
-
-        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        comments.forEach(it -> it.getBook().getGenres().isEmpty());
-        return comments;
+        return commentRepo.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -56,12 +52,18 @@ public class CommentServiceImpl implements CommentService {
             throw new EntityNotFoundException("The book with ID %s was not found".formatted(bookId));
         }
 
-        var comments = commentRepo.findAllForBook(bookId.id);
+        return commentRepo.findAllForBook(bookId.id);
+    }
 
-        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        comments.forEach(it -> it.getBook().getGenres().isEmpty());
-        return comments;
+    @Transactional(readOnly = true)
+    @Override
+    public List<Comment> findAllFromReader(EntityId<Reader> readerId) {
+        var reader = readerRepo.findById(readerId.id);
+        if (reader.isEmpty()) {
+            throw new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId));
+        }
+
+        return commentRepo.findAllFromReader(readerId.id);
     }
 
     @Transactional(readOnly = true)
@@ -75,18 +77,13 @@ public class CommentServiceImpl implements CommentService {
                 () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
         );
 
-        var comments = commentRepo.findAllFromReaderForBook(reader, book);
-
-        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        comments.forEach(it -> it.getBook().getGenres().isEmpty());
-        return comments;
+        return commentRepo.findAllFromReaderForBook(reader, book);
     }
 
     @Transactional
     @Override
     public boolean deleteById(EntityId<Comment> commentId) {
-        return commentRepo.deleteById(commentId.id);
+        return commentRepo.deleteById(commentId.id) == 1;
     }
 
     @Transactional
@@ -108,9 +105,6 @@ public class CommentServiceImpl implements CommentService {
 
         var comment = commentRepo.createComment(book, reader, text);
 
-        // !!! Пинаю лэйзи-коллекцию на втором уровнре, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        comment.getBook().getGenres().isEmpty();
         return comment;
     }
 

@@ -21,7 +21,7 @@ public interface CommentRepository {
 
     Comment createComment(Book book, Reader reader, String text);
 
-    boolean deleteById(long commentId);
+    int deleteById(long commentId);
 
     int deleteAllFromReader(long readerId);
 
