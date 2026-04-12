@@ -5,6 +5,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.ModelConverter;
 import ru.otus.hw.models.Author;
+import ru.otus.hw.models.dto.AuthorDto;
 import ru.otus.hw.services.AuthorService;
 
 import java.util.Arrays;
@@ -18,7 +19,7 @@ public class AuthorCommands {
 
     private final AuthorService authorService;
 
-    private final ModelConverter<Author> authorConverter;
+    private final ModelConverter<AuthorDto> authorConverter;
 
     @ShellMethod(value = "Find all authors", key = "aa")
     public String findAllAuthors() {

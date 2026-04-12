@@ -7,6 +7,7 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Reader;
+import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.ReaderRepository;
@@ -27,17 +28,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public Comment findById(Long commentId) {
+    public CommentDto findById(Long commentId) {
         var optComment = commentRepo.findById(commentId);
 
         if (optComment.isPresent()) {
-            var comment = optComment.get();
-            // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
-            // Просто транзакция не помогает. ХЗ как сделать правильно
-            comment.getBook().getGenres().isEmpty();
-            comment.getBook().getAuthor().getFullName();
-
-            return comment;
+            return CommentDto.fromEntity(optComment.get());
         } else {
             throw new EntityNotFoundException("Комментарий с ID %d не найден".formatted(commentId));
         }
@@ -45,34 +40,24 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public  List<Comment> findAll() {
-        var comments = commentRepo.findAll();
-
-        // !!! Пинаю лэйзи-коллекцию на втором уровне, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        comments.forEach(it -> {
-            it.getBook().getGenres().isEmpty();
-            it.getBook().getAuthor().getFullName();
-        });
-
-
-        return comments;
+    public  List<CommentDto> findAll() {
+        return commentRepo.findAll().stream().map(CommentDto::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Comment> findAllForBook(Long bookId) {
+    public List<CommentDto> findAllForBook(Long bookId) {
         var book = bookRepo.findById(bookId);
         if (book.isEmpty()) {
             throw new EntityNotFoundException("The book with ID %s was not found".formatted(bookId));
         }
 
-        return commentRepo.findByBook(book.get());
+        return commentRepo.findByBook(book.get()).stream().map(CommentDto::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Comment> findAllForBookFromReader(Long bookId, Long readerId) {
+    public List<CommentDto> findAllForBookFromReader(Long bookId, Long readerId) {
         var book = bookRepo.findById(bookId).orElseThrow(
                 () -> new EntityNotFoundException("The book with ID %s was not found".formatted(bookId))
         );
@@ -81,7 +66,7 @@ public class CommentServiceImpl implements CommentService {
                 () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
         );
 
-        return commentRepo.findByReaderAndBook(reader, book);
+        return commentRepo.findByReaderAndBook(reader, book).stream().map(CommentDto::fromEntity).toList();
     }
 
     @Transactional
@@ -98,7 +83,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public Comment createComment(EntityId<Reader> readerId, EntityId<Book> bookId, String text) {
+    public CommentDto createComment(EntityId<Reader> readerId, EntityId<Book> bookId, String text) {
         var book = bookRepo.findById(bookId.id).orElseThrow(
                 () -> new EntityNotFoundException("The book with ID %s was not found".formatted(bookId))
         );
@@ -107,14 +92,15 @@ public class CommentServiceImpl implements CommentService {
                 () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
         );
 
-        return commentRepo.saveAndFlush(
+        Comment createdComment = commentRepo.saveAndFlush(
                 new Comment(0, book, reader, text, new Date(System.currentTimeMillis()))
         );
+        return CommentDto.fromEntity(createdComment);
     }
 
     @Transactional
     @Override
-    public Comment updateComment(long commentId, String text) {
+    public CommentDto updateComment(long commentId, String text) {
         Comment originalComment = commentRepo.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Комментарий с ID %d не найден".formatted(commentId)));
 
@@ -125,9 +111,6 @@ public class CommentServiceImpl implements CommentService {
 
 
         Comment savedComment = commentRepo.saveAndFlush(updComment);
-        savedComment.getBook().getGenres().isEmpty();
-        savedComment.getBook().getAuthor().getFullName();
-
-        return savedComment;
+        return CommentDto.fromEntity(savedComment);
     }
 }
