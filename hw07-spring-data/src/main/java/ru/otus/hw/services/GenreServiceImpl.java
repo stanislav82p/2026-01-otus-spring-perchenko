@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Genre;
+import ru.otus.hw.models.dto.GenreDto;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
@@ -20,16 +21,16 @@ public class GenreServiceImpl implements GenreService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Genre> findAll() {
-        return genreRepository.findAll();
+    public List<GenreDto> findAll() {
+        return genreRepository.findAll().stream().map(GenreDto::fromGenre).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Genre findById(long id) {
+    public GenreDto findById(long id) {
         Optional<Genre> result = genreRepository.findById(id);
         if (result.isPresent()) {
-            return result.get();
+            return GenreDto.fromGenre(result.get());
         } else {
             throw new EntityNotFoundException("Жанр для ID %d не найден".formatted(id));
         }
@@ -37,8 +38,8 @@ public class GenreServiceImpl implements GenreService {
 
     @Transactional(readOnly = true)
     @Override
-    public Map<Long, Genre> findByIds(Set<Long> ids) {
+    public Map<Long, GenreDto> findByIds(Set<Long> ids) {
         return genreRepository.findByIdIn(ids).stream()
-                .collect(Collectors.toMap(Genre::getId, it -> it));
+                .collect(Collectors.toMap(Genre::getId, GenreDto::fromGenre));
     }
 }

@@ -1,15 +1,15 @@
 package ru.otus.hw.services;
 
-import ru.otus.hw.models.Author;
+import ru.otus.hw.models.dto.AuthorDto;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public interface AuthorService {
-    List<Author> findAll();
+    List<AuthorDto> findAll();
 
-    Author findById(long id);
+    AuthorDto findById(long id);
 
-    Map<Long, Author> findByIds(Set<Long> ids);
+    Map<Long, AuthorDto> findByIds(Set<Long> ids);
 }

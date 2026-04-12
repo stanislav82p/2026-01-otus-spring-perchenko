@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.dto.BookDto;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
@@ -26,10 +27,10 @@ public class BookServiceImpl implements BookService {
 
     @Transactional(readOnly = true)
     @Override
-    public Book findById(long id) {
+    public BookDto findById(long id) {
         Optional<Book> optBook = bookRepository.findById(id);
         if (optBook.isPresent()) {
-            return optBook.get();
+            return BookDto.fromEntity(optBook.get());
         } else {
             throw new EntityNotFoundException("Book with ID %d not found".formatted(id));
         }
@@ -37,23 +38,17 @@ public class BookServiceImpl implements BookService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Book> findAll() {
-        List<Book> books = bookRepository.findAll();
-
-        // !!! Пинаю лэйзи-коллекцию, чтобы загрузилась.
-        // Просто транзакция не помогает. ХЗ как сделать правильно
-        books.forEach(it -> it.getGenres().isEmpty());
-
-        return books;
+    public List<BookDto> findAll() {
+        return bookRepository.findAll().stream().map(BookDto::fromEntity).toList();
     }
 
     @Override
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
+    public BookDto insert(String title, long authorId, Set<Long> genresIds) {
         return save(0, title, authorId, genresIds);
     }
 
     @Override
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
+    public BookDto update(long id, String title, long authorId, Set<Long> genresIds) {
         return save(id, title, authorId, genresIds);
     }
 
@@ -64,7 +59,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Transactional
-    private Book save(long id, String title, long authorId, Set<Long> genresIds) {
+    private BookDto save(long id, String title, long authorId, Set<Long> genresIds) {
         if (isEmpty(genresIds)) {
             throw new IllegalArgumentException("Genres ids must not be null");
         }
@@ -78,6 +73,6 @@ public class BookServiceImpl implements BookService {
 
         var bookToSave = new Book(id, title, author, genres);
         Book savedBook = bookRepository.save(bookToSave);
-        return (id > 0) ? bookToSave : savedBook;
+        return BookDto.fromEntity(savedBook);
     }
 }
