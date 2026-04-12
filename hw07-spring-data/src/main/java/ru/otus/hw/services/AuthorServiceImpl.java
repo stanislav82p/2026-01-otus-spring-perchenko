@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
+import ru.otus.hw.models.dto.AuthorDto;
 import ru.otus.hw.repositories.AuthorRepository;
 
 import java.util.List;
@@ -20,16 +21,16 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Author> findAll() {
-        return authorRepository.findAll();
+    public List<AuthorDto> findAll() {
+        return authorRepository.findAll().stream().map(AuthorDto::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Author findById(long id) {
+    public AuthorDto findById(long id) {
         Optional<Author> result = authorRepository.findById(id);
         if (result.isPresent()) {
-            return result.get();
+            return AuthorDto.fromEntity(result.get());
         } else {
             throw new EntityNotFoundException("Автоp для ID %d не найден".formatted(id));
         }
@@ -37,8 +38,8 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Transactional(readOnly = true)
     @Override
-    public Map<Long, Author> findByIds(Set<Long> ids) {
+    public Map<Long, AuthorDto> findByIds(Set<Long> ids) {
         return authorRepository.findByIdIn(ids).stream()
-                .collect(Collectors.toMap(Author::getId, it -> it));
+                .collect(Collectors.toMap(Author::getId, AuthorDto::fromEntity));
     }
 }
