@@ -3,6 +3,7 @@ package ru.otus.hw.commands;
 import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import ru.otus.hw.converters.ModelConverter;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.dto.BookDto;
@@ -31,6 +32,13 @@ public class BookCommands {
     public String findBookById(long id) {
         var book = bookService.findById(id);
         return bookConverter.convertToString(book);
+    }
+
+    @ShellMethod(value = "Find books of Author", key = "bbauthor")
+    public String findBooksOfAuthor(@ShellOption(value = { "--author-id" }, help = "ID автора") long authorId) {
+        return bookService.findAllOfAuthor(authorId).stream()
+                .map(bookConverter::convertToString)
+                .collect(Collectors.joining("," + System.lineSeparator()));
     }
 
     // bins newBook 1 1,6

@@ -25,4 +25,8 @@ public class Genre {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    public static Genre forId(long genreId) {
+        return new Genre(genreId, null);
+    }
 }

@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.models.dto.BookDto;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
@@ -40,6 +42,25 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDto> findAll() {
         return bookRepository.findAll().stream().map(BookDto::fromEntity).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<BookDto> findAllOfAuthor(long authorId) {
+        return bookRepository.findByAuthor(Author.forId(authorId)).stream().map(BookDto::fromEntity).toList();
+    }
+
+    @Override
+    public List<BookDto> findAllOfGenre(long genreId) {
+        return bookRepository.findByGenres(Genre.forId(genreId)).stream().map(BookDto::fromEntity).toList();
+    }
+
+    @Override
+    public List<BookDto> findAllOfAuthorAndGenre(long authorId, long genreId) {
+        return bookRepository.findByAuthorAndGenres(Author.forId(authorId), Genre.forId(genreId))
+                .stream()
+                .map(BookDto::fromEntity)
+                .toList();
     }
 
     @Override

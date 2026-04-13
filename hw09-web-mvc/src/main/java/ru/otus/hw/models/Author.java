@@ -25,4 +25,8 @@ public class Author {
 
     @Column(name = "full_name", nullable = false, unique = true)
     private String fullName;
+
+    public static Author forId(long id) {
+        return new Author(id, null);
+    }
 }
