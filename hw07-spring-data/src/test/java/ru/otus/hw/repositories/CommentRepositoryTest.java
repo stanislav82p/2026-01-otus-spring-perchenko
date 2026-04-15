@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Comment;
-import ru.otus.hw.models.Reader;
+import ru.otus.hw.models.entity.BookEntity;
+import ru.otus.hw.models.entity.CommentEntity;
+import ru.otus.hw.models.entity.ReaderEntity;
 
 import java.sql.Date;
 import java.util.*;
@@ -29,13 +29,13 @@ public class CommentRepositoryTest {
     @Autowired
     private CommentRepository commentRepo;
 
-    private List<Comment> dbComments;
+    private List<CommentEntity> dbComments;
 
     @BeforeEach
     void setUp() {
         dbComments = new ArrayList<>(10);
         for (long id = 1; id <= 8; id ++) {
-            var comment = em.find(Comment.class, id);
+            var comment = em.find(CommentEntity.class, id);
             var txtComment = comment.toString();
             System.out.printf("\r\n---> Comment (%d): %s", id, txtComment);
             em.detach(comment);
@@ -46,8 +46,8 @@ public class CommentRepositoryTest {
     @DisplayName("Должен загружать комментарий по его ID")
     @Test
     void mustLoadCommentById() {
-        for (Comment expectedComment : dbComments) {
-            Optional<Comment> actualComment = commentRepo.findById(expectedComment.getId());
+        for (CommentEntity expectedComment : dbComments) {
+            Optional<CommentEntity> actualComment = commentRepo.findById(expectedComment.getId());
 
             assertThat(actualComment).isPresent().get().usingRecursiveComparison().isEqualTo(expectedComment);
         }
@@ -70,7 +70,7 @@ public class CommentRepositoryTest {
     void mustLoadAllCommentsForBook() {
         var expectedComments = dbComments.stream().filter(it -> it.getBook().getId() == BOOK_ID_2).toList();
 
-        var actualComments = commentRepo.findByBook(Book.forId(BOOK_ID_2));
+        var actualComments = commentRepo.findByBook(BookEntity.forId(BOOK_ID_2));
 
         assertThat(actualComments)
                 .usingRecursiveFieldByFieldElementComparator()
@@ -83,7 +83,7 @@ public class CommentRepositoryTest {
         var expectedComments = dbComments.stream()
                 .filter(it -> it.getReader().getId() == READER_ID_1).toList();
 
-        var actualComments = commentRepo.findByReader(Reader.forId(READER_ID_1));
+        var actualComments = commentRepo.findByReader(ReaderEntity.forId(READER_ID_1));
 
         assertThat(actualComments)
                 .usingRecursiveFieldByFieldElementComparator()
@@ -93,8 +93,8 @@ public class CommentRepositoryTest {
     @DisplayName("Должен загружать все комментарии от читателя для определенной книги")
     @Test
     void mustLoadAllCommentsFromReaderForBook() {
-        Book   book2   = em.find(Book.class,   BOOK_ID_2);
-        Reader reader1 = em.find(Reader.class, READER_ID_1);
+        BookEntity book2   = em.find(BookEntity.class,   BOOK_ID_2);
+        ReaderEntity reader1 = em.find(ReaderEntity.class, READER_ID_1);
 
         var expectedComments = dbComments.stream()
                 .filter(it -> (it.getReader().getId() == READER_ID_1) && (it.getBook().getId() == BOOK_ID_2))
@@ -116,10 +116,10 @@ public class CommentRepositoryTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
 
-        Comment createdComm = commentRepo.saveAndFlush(
-                Comment.builder()
-                        .book(em.find(Book.class, BOOK_ID_2))
-                        .reader(em.find(Reader.class, READER_ID_1))
+        CommentEntity createdComm = commentRepo.saveAndFlush(
+                CommentEntity.builder()
+                        .book(em.find(BookEntity.class, BOOK_ID_2))
+                        .reader(em.find(ReaderEntity.class, READER_ID_1))
                         .text("Comment 100500")
                         .date(new Date(cal.getTimeInMillis()))
                         .build()
@@ -131,7 +131,7 @@ public class CommentRepositoryTest {
 
         em.detach(createdComm);
 
-        Comment foundComment = em.find(Comment.class, createdComm.getId());
+        CommentEntity foundComment = em.find(CommentEntity.class, createdComm.getId());
 
         assertThat(foundComment).usingRecursiveComparison().isEqualTo(createdComm);
     }
@@ -139,7 +139,7 @@ public class CommentRepositoryTest {
     @DisplayName("Должен обновлять комментарий")
     @Test
     void mustUpdateComment() {
-        Comment originalComment = em.find(Comment.class, COMMENT_ID_1);
+        CommentEntity originalComment = em.find(CommentEntity.class, COMMENT_ID_1);
         em.detach(originalComment);
 
         Calendar cal = new GregorianCalendar();
@@ -148,14 +148,14 @@ public class CommentRepositoryTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
 
-        Comment commentToUpdate = originalComment.toBuilder()
+        CommentEntity commentToUpdate = originalComment.toBuilder()
                 .text("Comment 100500")
                 .date(new Date(cal.getTimeInMillis()))
                 .build();
 
-        Comment updatedComment = commentRepo.saveAndFlush(commentToUpdate);
+        CommentEntity updatedComment = commentRepo.saveAndFlush(commentToUpdate);
 
-        Comment foundNewComment = em.find(Comment.class, COMMENT_ID_1);
+        CommentEntity foundNewComment = em.find(CommentEntity.class, COMMENT_ID_1);
 
         assertThat(updatedComment).usingRecursiveComparison().isEqualTo(commentToUpdate);
         assertThat(foundNewComment).usingRecursiveComparison().isEqualTo(commentToUpdate);
@@ -165,25 +165,25 @@ public class CommentRepositoryTest {
     @DisplayName("Должен удалять комментарий")
     @Test
     void mustDeleteComment() {
-        Comment comment = em.find(Comment.class, COMMENT_ID_1);
+        CommentEntity comment = em.find(CommentEntity.class, COMMENT_ID_1);
         em.detach(comment);
         assertThat(comment).isNotNull();
 
         commentRepo.deleteById(COMMENT_ID_1);
 
-        assertThat(em.find(Comment.class, COMMENT_ID_1)).isNull();
+        assertThat(em.find(CommentEntity.class, COMMENT_ID_1)).isNull();
     }
 
     @DisplayName("Должен удалять комментарий")
     @Test
     void mustDeleteAllCommentsFromReader() {
-        int nDeleted = commentRepo.deleteByReader(Reader.forId(READER_ID_1));
+        int nDeleted = commentRepo.deleteByReader(ReaderEntity.forId(READER_ID_1));
 
         assertThat(nDeleted).isEqualTo(3);
 
-        List<Comment> allComments = new ArrayList<>(5);
+        List<CommentEntity> allComments = new ArrayList<>(5);
         for (long id = 1; id <= 8; id ++) {
-            var comment = em.find(Comment.class, id);
+            var comment = em.find(CommentEntity.class, id);
             if (comment != null) {
                 allComments.add(comment);
             }

@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
-import ru.otus.hw.models.dto.AuthorDto;
-import ru.otus.hw.models.dto.BookDto;
 
 import java.util.List;
 import java.util.Set;
@@ -35,15 +33,15 @@ public class BookServiceTest {
     @DisplayName("Должен загружать книгу по ID")
     @Test
     void mustLoadBookById() {
-        BookDto book = bookService.findById(BOOK_ID_2);
+        Book book = bookService.findById(BOOK_ID_2);
 
-        assertThat(book).extracting(BookDto::getId).isEqualTo(BOOK_ID_2);
+        assertThat(book).extracting(Book::getId).isEqualTo(BOOK_ID_2);
         assertThat(book)
-                .extracting(BookDto::getAuthor)
-                .extracting(AuthorDto::getId)
+                .extracting(Book::getAuthor)
+                .extracting(Author::getId)
                 .isEqualTo(AUTHOR_ID_2);
         assertThat(book)
-                .extracting(BookDto::getGenres)
+                .extracting(Book::getGenres)
                 .extracting(Set::size)
                 .isEqualTo(2);
     }
@@ -51,7 +49,7 @@ public class BookServiceTest {
     @DisplayName("Должен загружать все книги")
     @Test
     void mustLoadAllBooks() {
-        List<BookDto> books = bookService.findAll();
+        List<? extends Book> books = bookService.findAll();
 
         assertThat(books.size()).isEqualTo(3);
 
@@ -65,7 +63,7 @@ public class BookServiceTest {
     @DirtiesContext
     @Test
     void mustDeleteBookById() {
-        BookDto book = bookService.findById(BOOK_ID_2);
+        Book book = bookService.findById(BOOK_ID_2);
 
         bookService.deleteById(BOOK_ID_2);
 

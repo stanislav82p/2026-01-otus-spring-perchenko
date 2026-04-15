@@ -2,9 +2,10 @@ package ru.otus.hw.models.dto;
 
 import lombok.Getter;
 import ru.otus.hw.models.Genre;
+import ru.otus.hw.models.entity.GenreEntity;
 
 @Getter
-public class GenreDto {
+public class GenreDto implements Genre {
     private final long id;
 
     private final String name;
@@ -14,7 +15,7 @@ public class GenreDto {
         this.name = name;
     }
 
-    public static GenreDto fromGenre(Genre genre) {
+    public static GenreDto fromGenre(GenreEntity genre) {
         return new GenreDto(genre.getId(), genre.getName());
     }
 }
