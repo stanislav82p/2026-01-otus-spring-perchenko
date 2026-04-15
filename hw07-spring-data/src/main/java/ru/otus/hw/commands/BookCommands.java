@@ -5,7 +5,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.ModelConverter;
 import ru.otus.hw.models.Book;
-import ru.otus.hw.models.dto.BookDto;
 import ru.otus.hw.services.BookService;
 
 import java.util.Set;
@@ -18,7 +17,7 @@ public class BookCommands {
 
     private final BookService bookService;
 
-    private final ModelConverter<BookDto> bookConverter;
+    private final ModelConverter<Book> bookConverter;
 
     @ShellMethod(value = "Find all books", key = "ab")
     public String findAllBooks() {

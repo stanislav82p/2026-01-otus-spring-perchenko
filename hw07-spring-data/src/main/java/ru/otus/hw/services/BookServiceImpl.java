@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Book;
+import ru.otus.hw.models.entity.BookEntity;
 import ru.otus.hw.models.dto.BookDto;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
@@ -28,7 +28,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public BookDto findById(long id) {
-        Optional<Book> optBook = bookRepository.findById(id);
+        Optional<BookEntity> optBook = bookRepository.findById(id);
         if (optBook.isPresent()) {
             return BookDto.fromEntity(optBook.get());
         } else {
@@ -71,8 +71,8 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
 
-        var bookToSave = new Book(id, title, author, genres);
-        Book savedBook = bookRepository.save(bookToSave);
+        var bookToSave = new BookEntity(id, title, author, genres);
+        BookEntity savedBook = bookRepository.save(bookToSave);
         return BookDto.fromEntity(savedBook);
     }
 }

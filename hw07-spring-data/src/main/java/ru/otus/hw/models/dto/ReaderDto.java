@@ -2,9 +2,10 @@ package ru.otus.hw.models.dto;
 
 import lombok.Getter;
 import ru.otus.hw.models.Reader;
+import ru.otus.hw.models.entity.ReaderEntity;
 
 @Getter
-public class ReaderDto {
+public class ReaderDto implements Reader {
     private final long id;
 
     private final String fullName;
@@ -14,7 +15,7 @@ public class ReaderDto {
         this.fullName = fullName;
     }
 
-    public static ReaderDto fromEntity(Reader reader) {
+    public static ReaderDto fromEntity(ReaderEntity reader) {
         return new ReaderDto(reader.getId(), reader.getFullName());
     }
 }

@@ -2,11 +2,12 @@ package ru.otus.hw.models.dto;
 
 import lombok.Getter;
 import ru.otus.hw.models.Comment;
+import ru.otus.hw.models.entity.CommentEntity;
 
 import java.sql.Date;
 
 @Getter
-public class CommentDto {
+public class CommentDto implements Comment {
     private final long id;
 
     private final BookDto book;
@@ -25,7 +26,7 @@ public class CommentDto {
         this.date = date;
     }
 
-    public static CommentDto fromEntity(Comment comment) {
+    public static CommentDto fromEntity(CommentEntity comment) {
         return new CommentDto(
                 comment.getId(),
                 BookDto.fromEntity(comment.getBook()),

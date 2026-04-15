@@ -2,13 +2,13 @@ package ru.otus.hw.models.dto;
 
 import lombok.Getter;
 import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.models.entity.BookEntity;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
-public class BookDto {
+public class BookDto implements Book {
     private final long id;
 
     private final String title;
@@ -24,7 +24,7 @@ public class BookDto {
         this.genres = genres;
     }
 
-    public static BookDto fromEntity(Book book) {
+    public static BookDto fromEntity(BookEntity book) {
         return new BookDto(
                 book.getId(),
                 book.getTitle(),

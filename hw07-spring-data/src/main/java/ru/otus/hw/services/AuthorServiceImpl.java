@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Author;
 import ru.otus.hw.models.dto.AuthorDto;
+import ru.otus.hw.models.entity.AuthorEntity;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.repositories.AuthorRepository;
 
 import java.util.List;
@@ -21,14 +22,14 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<AuthorDto> findAll() {
+    public List<? extends Author> findAll() {
         return authorRepository.findAll().stream().map(AuthorDto::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
     public AuthorDto findById(long id) {
-        Optional<Author> result = authorRepository.findById(id);
+        Optional<AuthorEntity> result = authorRepository.findById(id);
         if (result.isPresent()) {
             return AuthorDto.fromEntity(result.get());
         } else {
@@ -38,8 +39,8 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Transactional(readOnly = true)
     @Override
-    public Map<Long, AuthorDto> findByIds(Set<Long> ids) {
+    public Map<Long, Author> findByIds(Set<Long> ids) {
         return authorRepository.findByIdIn(ids).stream()
-                .collect(Collectors.toMap(Author::getId, AuthorDto::fromEntity));
+                .collect(Collectors.toMap(AuthorEntity::getId, AuthorDto::fromEntity));
     }
 }
