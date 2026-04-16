@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+        "https://checkstyle.org/dtds/suppressions_1_0.dtd">
+
+<suppressions>
+    <suppress checks="JavaNCSS"
+              files="Tester.java"
+              lines="53-102"/>
+    <suppress checks="MethodLength"
+              files="Tester.java"
+              lines="53-102"/>
+    <suppress checks="VisibilityModifier"
+              files="EntityId.java"
+              lines="7"/>
+</suppressions>
