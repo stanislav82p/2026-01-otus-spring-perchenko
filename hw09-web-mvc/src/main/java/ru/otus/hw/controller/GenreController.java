@@ -5,10 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.otus.hw.models.dto.GenreDto;
 import ru.otus.hw.services.GenreService;
-
-import java.util.List;
 
 import static ru.otus.hw.controller.RootController.BASE_URL;
 
@@ -25,7 +22,7 @@ public class GenreController {
 
     @GetMapping("/genres")
     public String listAllAuthors(Model model) {
-        List<GenreDto> genres = genreService.findAll();
+        var genres = genreService.findAll();
         model.addAttribute("genres", genres);
         return "genres";
     }

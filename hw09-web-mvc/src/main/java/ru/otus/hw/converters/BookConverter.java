@@ -5,22 +5,19 @@ import org.springframework.stereotype.Component;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
-import ru.otus.hw.models.dto.AuthorDto;
-import ru.otus.hw.models.dto.BookDto;
-import ru.otus.hw.models.dto.GenreDto;
 
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
 // Тут специально ограничил видимость имплементации, чтобы можно было инжектить только дженерик !!!
-class BookConverter implements ModelConverter<BookDto> {
-    private final ModelConverter<AuthorDto> authorConverter;
+class BookConverter implements ModelConverter<Book> {
+    private final ModelConverter<Author> authorConverter;
 
-    private final ModelConverter<GenreDto> genreConverter;
+    private final ModelConverter<Genre> genreConverter;
 
     @Override
-    public String convertToString(BookDto book) {
+    public String convertToString(Book book) {
         var genresString = book.getGenres().stream()
                 .map(genreConverter::convertToString)
                 .map("{%s}"::formatted)

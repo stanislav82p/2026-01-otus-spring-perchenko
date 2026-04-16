@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.models.entity.GenreEntity;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,13 +23,13 @@ public class GenreRepositoryTest {
     @Autowired
     private GenreRepository genreRepo;
 
-    private List<Genre> dbGenres;
+    private List<GenreEntity> dbGenres;
 
     @BeforeEach
     void setUp() {
         dbGenres = new ArrayList<>(6);
         for (long id = 1; id <= 6; id ++) {
-            var genre = em.find(Genre.class, id);
+            var genre = em.find(GenreEntity.class, id);
             em.detach(genre);
             dbGenres.add(genre);
         }
@@ -38,7 +38,7 @@ public class GenreRepositoryTest {
     @DisplayName("Должен загружать список всех жанров")
     @Test
     void shouldReturnCorrectGenreList() {
-        List<Genre> actualGenres = genreRepo.findAll();
+        List<GenreEntity> actualGenres = genreRepo.findAll();
 
         assertThat(actualGenres)
                 .usingRecursiveFieldByFieldElementComparator()
@@ -48,10 +48,10 @@ public class GenreRepositoryTest {
     @DisplayName("Должен загружать жанр по id")
     @Test
     void shouldReturnCorrectGenresByIds() {
-        Set<Genre> expectedGenres = Set.of(dbGenres.get(1), dbGenres.get(3), dbGenres.get(4));
+        Set<GenreEntity> expectedGenres = Set.of(dbGenres.get(1), dbGenres.get(3), dbGenres.get(4));
 
-        Set<Long> ids = expectedGenres.stream().map(Genre::getId).collect(Collectors.toSet());
-        Set<Genre> actualGenres = genreRepo.findByIdIn(ids);
+        Set<Long> ids = expectedGenres.stream().map(GenreEntity::getId).collect(Collectors.toSet());
+        Set<GenreEntity> actualGenres = genreRepo.findByIdIn(ids);
 
         assertThat(actualGenres)
                 .usingRecursiveFieldByFieldElementComparator()
@@ -61,7 +61,7 @@ public class GenreRepositoryTest {
     @DisplayName("Не должен загружать жанр по неверному id")
     @Test
     void shouldNotReturnAuthorForWrongId() {
-        Optional<Genre> actualGenre = genreRepo.findById(100500);
+        Optional<GenreEntity> actualGenre = genreRepo.findById(100500);
         assertThat(actualGenre).isNotPresent();
     }
 

@@ -5,7 +5,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.ModelConverter;
 import ru.otus.hw.models.Genre;
-import ru.otus.hw.models.dto.GenreDto;
 import ru.otus.hw.services.GenreService;
 
 import java.util.Arrays;
@@ -18,7 +17,7 @@ public class GenreCommands {
 
     private final GenreService genreService;
 
-    private final ModelConverter<GenreDto> genreConverter;
+    private final ModelConverter<Genre> genreConverter;
 
     @ShellMethod(value = "Find all genres", key = "ag")
     public String findAllGenres() {

@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.models.entity.AuthorEntity;
+import ru.otus.hw.models.entity.BookEntity;
 import ru.otus.hw.models.dto.BookDto;
+import ru.otus.hw.models.entity.GenreEntity;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
@@ -30,7 +30,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public BookDto findById(long id) {
-        Optional<Book> optBook = bookRepository.findById(id);
+        Optional<BookEntity> optBook = bookRepository.findById(id);
         if (optBook.isPresent()) {
             return BookDto.fromEntity(optBook.get());
         } else {
@@ -47,17 +47,17 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public List<BookDto> findAllOfAuthor(long authorId) {
-        return bookRepository.findByAuthor(Author.forId(authorId)).stream().map(BookDto::fromEntity).toList();
+        return bookRepository.findByAuthor(AuthorEntity.forId(authorId)).stream().map(BookDto::fromEntity).toList();
     }
 
     @Override
     public List<BookDto> findAllOfGenre(long genreId) {
-        return bookRepository.findByGenres(Genre.forId(genreId)).stream().map(BookDto::fromEntity).toList();
+        return bookRepository.findByGenres(GenreEntity.forId(genreId)).stream().map(BookDto::fromEntity).toList();
     }
 
     @Override
     public List<BookDto> findAllOfAuthorAndGenre(long authorId, long genreId) {
-        return bookRepository.findByAuthorAndGenres(Author.forId(authorId), Genre.forId(genreId))
+        return bookRepository.findByAuthorAndGenres(AuthorEntity.forId(authorId), GenreEntity.forId(genreId))
                 .stream()
                 .map(BookDto::fromEntity)
                 .toList();
@@ -92,8 +92,8 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
 
-        var bookToSave = new Book(id, title, author, genres);
-        Book savedBook = bookRepository.save(bookToSave);
+        var bookToSave = new BookEntity(id, title, author, genres);
+        BookEntity savedBook = bookRepository.save(bookToSave);
         return BookDto.fromEntity(savedBook);
     }
 }

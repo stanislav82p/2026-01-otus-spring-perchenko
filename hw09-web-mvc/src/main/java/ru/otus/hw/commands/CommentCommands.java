@@ -8,7 +8,6 @@ import ru.otus.hw.converters.ModelConverter;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Reader;
-import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.services.CommentService;
 import ru.otus.hw.utils.EntityId;
 
@@ -20,7 +19,7 @@ public class CommentCommands {
 
     private final CommentService commentService;
 
-    private final ModelConverter<CommentDto> commentConverter;
+    private final ModelConverter<Comment> commentConverter;
 
     @ShellMethod(value = "Find all comments", key = "allcomments")
     public String findAllComments() {
@@ -85,10 +84,10 @@ public class CommentCommands {
             @ShellOption(value = { "--text", "-t" }, help = "текст комментария")
             String txt
     ) {
-        EntityId<Book> bId   = EntityId.forValue(bookId);
         EntityId<Reader> rId = EntityId.forValue(readerId);
+        EntityId<Book > bId = EntityId.forValue(bookId);
 
-        CommentDto comment = commentService.createComment(rId, bId, txt);
+        Comment comment = commentService.createComment(rId, bId, txt);
         return "Comment was created: %s".formatted(commentConverter.convertToString(comment));
     }
 
@@ -100,7 +99,7 @@ public class CommentCommands {
             @ShellOption(value = { "--text", "-t" }, help = "текст комментария")
             String txt
     ) {
-        CommentDto comment = commentService.updateComment(commentId, txt);
+        Comment comment = commentService.updateComment(commentId, txt);
         return "Comment was updated: %s".formatted(commentConverter.convertToString(comment));
     }
 }

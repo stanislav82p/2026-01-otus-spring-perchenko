@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Reader;
-import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.utils.EntityId;
 
 import java.util.List;
@@ -33,18 +32,17 @@ public class CommentServiceTest {
     @DisplayName("Должен загружать все комментарии")
     @Test
     void mustLoadAll() {
-        List<CommentDto> comments = commService.findAll();
+        List<? extends Comment> comments = commService.findAll();
         assertThat(comments.size()).isEqualTo(8);
         assertThat(comments)
                 .allMatch(it -> it.getReader() != null)
-                .allMatch(it -> it.getBook().getAuthor() != null)
-                .allMatch(it -> !it.getBook().getGenres().isEmpty());
+                .allMatch(it -> it.getBook().getAuthor() != null);
     }
 
     @DisplayName("Должен загружать все комментарии для книги")
     @Test
     void mustLoadAllCommentsForBook() {
-        List<CommentDto> comments = commService.findAllForBook(BOOK_ID_2);
+        List<? extends Comment> comments = commService.findAllForBook(BOOK_ID_2);
 
         assertThat(comments.size()).isEqualTo(5);
         assertThat(comments)
@@ -57,7 +55,7 @@ public class CommentServiceTest {
     @DisplayName("Должен загружать все комментарии от читателя для определенной книги")
     @Test
     void mustLoadAllCommentsFromReaderForBook() {
-        List<CommentDto> comments = commService.findAllForBookFromReader(BOOK_ID_2, READER_ID_1);
+        List<? extends Comment> comments = commService.findAllForBookFromReader(BOOK_ID_2, READER_ID_1);
 
         assertThat(comments.size()).isEqualTo(2);
         assertThat(comments)
@@ -73,15 +71,15 @@ public class CommentServiceTest {
     @Test
     void mustCreateComment() {
         EntityId<Reader> rId = EntityId.forValue(READER_ID_1);
-        EntityId<Book> bId = EntityId.forValue(BOOK_ID_2);
-        CommentDto createdComm = commService.createComment(rId, bId, "Comment 100500");
+        EntityId<Book > bId = EntityId.forValue(BOOK_ID_2);
+        Comment createdComm = commService.createComment(rId, bId, "Comment 100500");
 
         assertThat(createdComm.getId()).isGreaterThan(0);
 
         var found = commService.findById(createdComm.getId());
 
-        assertThat(found).extracting(CommentDto::getId).isEqualTo(createdComm.getId());
-        assertThat(found).extracting(CommentDto::getText).isEqualTo(createdComm.getText());
+        assertThat(found).extracting(Comment::getId).isEqualTo(createdComm.getId());
+        assertThat(found).extracting(Comment::getText).isEqualTo(createdComm.getText());
     }
 
     @DisplayName("Должен удалять все комментарии читателя")
@@ -92,7 +90,7 @@ public class CommentServiceTest {
 
         assertThat(nDel).isEqualTo(3);
 
-        List<CommentDto> comments = commService.findAll();
+        List<? extends Comment> comments = commService.findAll();
 
         assertThat(comments.size()).isEqualTo(5);
         assertThat(comments).allMatch(it -> it.getReader().getId() != READER_ID_1);

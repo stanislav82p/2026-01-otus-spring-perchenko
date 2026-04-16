@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Genre;
+import ru.otus.hw.models.entity.GenreEntity;
 import ru.otus.hw.models.dto.GenreDto;
 import ru.otus.hw.repositories.GenreRepository;
 
@@ -28,7 +29,7 @@ public class GenreServiceImpl implements GenreService {
     @Transactional(readOnly = true)
     @Override
     public GenreDto findById(long id) {
-        Optional<Genre> result = genreRepository.findById(id);
+        Optional<GenreEntity> result = genreRepository.findById(id);
         if (result.isPresent()) {
             return GenreDto.fromGenre(result.get());
         } else {
@@ -38,8 +39,8 @@ public class GenreServiceImpl implements GenreService {
 
     @Transactional(readOnly = true)
     @Override
-    public Map<Long, GenreDto> findByIds(Set<Long> ids) {
+    public Map<Long, Genre> findByIds(Set<Long> ids) {
         return genreRepository.findByIdIn(ids).stream()
-                .collect(Collectors.toMap(Genre::getId, GenreDto::fromGenre));
+                .collect(Collectors.toMap(GenreEntity::getId, GenreDto::fromGenre));
     }
 }

@@ -5,10 +5,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 import ru.otus.hw.controller.dto.BookCreationDto;
-import ru.otus.hw.models.dto.*;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
@@ -25,8 +34,11 @@ import static ru.otus.hw.controller.RootController.BASE_URL;
 public class BookController {
 
     private final BookService bookService;
+
     private final AuthorService authorService;
+
     private final GenreService genreService;
+
     private final CommentService commentService;
 
     @Autowired
@@ -45,9 +57,9 @@ public class BookController {
 
     @GetMapping("/books")
     public ModelAndView listAllBooks() {
-        List<BookDto> books = bookService.findAll();
-        List<AuthorDto> authors = authorService.findAll();
-        List<GenreDto> genres = genreService.findAll();
+        List<? extends Book> books = bookService.findAll();
+        List<? extends Author> authors = authorService.findAll();
+        List<? extends Genre> genres = genreService.findAll();
 
         ModelAndView mv = new ModelAndView();
         mv.setViewName("books");
@@ -64,7 +76,7 @@ public class BookController {
             @RequestParam(value = "author_id", defaultValue = "0") long authorId,
             @RequestParam(value = "genre_id", defaultValue = "0") long genreId
     ) {
-        List<BookDto> books;
+        List<? extends Book> books;
         ModelAndView mv = new ModelAndView();
         if (authorId <= 0 && genreId <= 0) {
             mv.setViewName("redirect:%s/books".formatted(BASE_URL));
@@ -77,14 +89,10 @@ public class BookController {
             books = bookService.findAllOfAuthorAndGenre(authorId, genreId);
         }
 
-        List<AuthorDto> authors = authorService.findAll();
-        List<GenreDto> genres = genreService.findAll();
-
-
         mv.setViewName("books");
         mv.addObject("books", books);
-        mv.addObject("authors", authors);
-        mv.addObject("genres", genres);
+        mv.addObject("authors", authorService.findAll());
+        mv.addObject("genres",  genreService.findAll());
         mv.addObject("selected_author_id", authorId);
         mv.addObject("selected_genre_id", genreId);
         return mv;
@@ -92,8 +100,8 @@ public class BookController {
 
     @GetMapping("/books/{id}")
     public ModelAndView bookDetails(@PathVariable("id") long bookId) {
-        BookDto b = bookService.findById(bookId);
-        List<CommentDto> comments = commentService.findAllForBook(bookId)
+        Book b = bookService.findById(bookId);
+        List<? extends Comment> comments = commentService.findAllForBook(bookId)
                 .stream()
                 .sorted((c1, c2) -> (int)(c1.getDate().getTime() - c2.getDate().getTime()))
                 .toList();
@@ -107,7 +115,7 @@ public class BookController {
 
     @GetMapping("/books/{id}/delete")
     public String requestDeleteBook(@PathVariable("id") long bookId, Model model) {
-        BookDto b = bookService.findById(bookId);
+        Book b = bookService.findById(bookId);
         model.addAttribute("book", b);
         return "bookDeleteConfirm";
     }
@@ -121,14 +129,14 @@ public class BookController {
 
     @GetMapping("/books/{id}/editor")
     public ModelAndView openBookEditor(@PathVariable("id") long bookId) {
-        BookDto b = bookService.findById(bookId);
-        List<AuthorDto> authors = authorService.findAll();
-        List<GenreDto> genres = genreService.findAll();
+        Book b = bookService.findById(bookId);
+        List<? extends Author> authors = authorService.findAll();
+        List<? extends Genre> genres = genreService.findAll();
 
         var dto = new BookCreationDto(
                 b.getAuthor().getId(),
                 b.getTitle(),
-                b.getGenres().stream().map(GenreDto::getId).collect(Collectors.toSet())
+                b.getGenres().stream().map(Genre::getId).collect(Collectors.toSet())
         );
 
         var mv = new ModelAndView();
@@ -148,9 +156,9 @@ public class BookController {
             Model model
     ) {
         if (bindingResult.hasErrors()) {
-            BookDto b = bookService.findById(bookId);
-            List<AuthorDto> authors = authorService.findAll();
-            List<GenreDto> genres = genreService.findAll();
+            Book b = bookService.findById(bookId);
+            List<? extends Author> authors = authorService.findAll();
+            List<? extends Genre> genres = genreService.findAll();
             model.addAttribute("book", b);
             model.addAttribute("authors", authors);
             model.addAttribute("genres", genres);
@@ -164,8 +172,8 @@ public class BookController {
 
     @GetMapping("/books/creator")
     public ModelAndView openBookCreator() {
-        List<AuthorDto> authors = authorService.findAll();
-        List<GenreDto> genres = genreService.findAll();
+        List<? extends Author> authors = authorService.findAll();
+        List<? extends Genre> genres = genreService.findAll();
 
         var dto = new BookCreationDto(0, "", Set.of(1L));
 
@@ -184,8 +192,8 @@ public class BookController {
             Model model
     ) {
         if (bindingResult.hasErrors()) {
-            List<AuthorDto> authors = authorService.findAll();
-            List<GenreDto> genres = genreService.findAll();
+            List<? extends Author> authors = authorService.findAll();
+            List<? extends Genre> genres = genreService.findAll();
             model.addAttribute("authors", authors);
             model.addAttribute("genres", genres);
             return "bookCreator";
