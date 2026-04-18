@@ -42,24 +42,24 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public  List<? extends Comment> findAll() {
-        return commentRepo.findAll();
+    public  List<Comment> findAll() {
+        return commentRepo.findAll().stream().map(it -> (Comment) CommentDto.fromEntity(it)).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<? extends Comment> findAllForBook(Long bookId) {
+    public List<Comment> findAllForBook(Long bookId) {
         var book = bookRepo.findById(bookId);
         if (book.isEmpty()) {
             throw new EntityNotFoundException("The book with ID %s was not found".formatted(bookId));
         }
 
-        return commentRepo.findByBook(book.get());
+        return commentRepo.findByBook(book.get()).stream().map(it -> (Comment) CommentDto.fromEntity(it)).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<? extends Comment> findAllForBookFromReader(Long bookId, Long readerId) {
+    public List<Comment> findAllForBookFromReader(Long bookId, Long readerId) {
         var book = bookRepo.findById(bookId).orElseThrow(
                 () -> new EntityNotFoundException("The book with ID %s was not found".formatted(bookId))
         );
@@ -68,7 +68,10 @@ public class CommentServiceImpl implements CommentService {
                 () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
         );
 
-        return commentRepo.findByReaderAndBook(reader, book);
+        return commentRepo.findByReaderAndBook(reader, book)
+                .stream()
+                .map(it -> (Comment) CommentDto.fromEntity(it))
+                .toList();
     }
 
     @Transactional

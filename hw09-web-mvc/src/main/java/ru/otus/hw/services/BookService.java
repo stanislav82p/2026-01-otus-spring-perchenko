@@ -8,13 +8,13 @@ import java.util.Set;
 public interface BookService {
     Book findById(long id);
 
-    List<? extends Book> findAll();
+    List<Book> findAll();
 
-    List<? extends Book> findAllOfAuthor(long authorId);
+    List<Book> findAllOfAuthor(long authorId);
 
-    List<? extends Book> findAllOfGenre(long genreId);
+    List<Book> findAllOfGenre(long genreId);
 
-    List<? extends Book> findAllOfAuthorAndGenre(long authorId, long genreId);
+    List<Book> findAllOfAuthorAndGenre(long authorId, long genreId);
 
     Book insert(String title, long authorId, Set<Long> genresIds);
 

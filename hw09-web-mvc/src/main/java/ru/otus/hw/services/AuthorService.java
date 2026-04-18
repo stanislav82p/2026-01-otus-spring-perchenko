@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface AuthorService {
-    List<? extends Author> findAll();
+    List<Author> findAll();
 
     Author findById(long id);
 

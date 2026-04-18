@@ -11,11 +11,11 @@ public interface CommentService {
 
     Comment findById(Long commentId);
 
-    List<? extends Comment> findAll();
+    List<Comment> findAll();
 
-    List<? extends Comment> findAllForBook(Long bookId);
+    List<Comment> findAllForBook(Long bookId);
 
-    List<? extends Comment> findAllForBookFromReader(Long bookId, Long readerId);
+    List<Comment> findAllForBookFromReader(Long bookId, Long readerId);
 
     void deleteById(Long commentId);
 

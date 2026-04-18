@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.models.Book;
 import ru.otus.hw.models.entity.AuthorEntity;
 import ru.otus.hw.models.entity.BookEntity;
 import ru.otus.hw.models.dto.BookDto;
@@ -40,26 +41,32 @@ public class BookServiceImpl implements BookService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookDto> findAll() {
-        return bookRepository.findAll().stream().map(BookDto::fromEntity).toList();
+    public List<Book> findAll() {
+        return bookRepository.findAll().stream().map(it -> (Book) BookDto.fromEntity(it)).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookDto> findAllOfAuthor(long authorId) {
-        return bookRepository.findByAuthor(AuthorEntity.forId(authorId)).stream().map(BookDto::fromEntity).toList();
+    public List<Book> findAllOfAuthor(long authorId) {
+        return bookRepository.findByAuthor(AuthorEntity.forId(authorId))
+                .stream()
+                .map(it -> (Book) BookDto.fromEntity(it))
+                .toList();
     }
 
     @Override
-    public List<BookDto> findAllOfGenre(long genreId) {
-        return bookRepository.findByGenres(GenreEntity.forId(genreId)).stream().map(BookDto::fromEntity).toList();
+    public List<Book> findAllOfGenre(long genreId) {
+        return bookRepository.findByGenres(GenreEntity.forId(genreId))
+                .stream()
+                .map(it -> (Book) BookDto.fromEntity(it))
+                .toList();
     }
 
     @Override
-    public List<BookDto> findAllOfAuthorAndGenre(long authorId, long genreId) {
+    public List<Book> findAllOfAuthorAndGenre(long authorId, long genreId) {
         return bookRepository.findByAuthorAndGenres(AuthorEntity.forId(authorId), GenreEntity.forId(genreId))
                 .stream()
-                .map(BookDto::fromEntity)
+                .map(it -> (Book) BookDto.fromEntity(it))
                 .toList();
     }
 

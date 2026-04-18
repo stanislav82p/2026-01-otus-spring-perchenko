@@ -57,9 +57,9 @@ public class BookController {
 
     @GetMapping("/books")
     public ModelAndView listAllBooks() {
-        List<? extends Book> books = bookService.findAll();
-        List<? extends Author> authors = authorService.findAll();
-        List<? extends Genre> genres = genreService.findAll();
+        List<Book> books = bookService.findAll();
+        List<Author> authors = authorService.findAll();
+        List<Genre> genres = genreService.findAll();
 
         ModelAndView mv = new ModelAndView();
         mv.setViewName("books");
@@ -76,7 +76,7 @@ public class BookController {
             @RequestParam(value = "author_id", defaultValue = "0") long authorId,
             @RequestParam(value = "genre_id", defaultValue = "0") long genreId
     ) {
-        List<? extends Book> books;
+        List<Book> books;
         ModelAndView mv = new ModelAndView();
         if (authorId <= 0 && genreId <= 0) {
             mv.setViewName("redirect:%s/books".formatted(BASE_URL));
@@ -101,7 +101,7 @@ public class BookController {
     @GetMapping("/books/{id}")
     public ModelAndView bookDetails(@PathVariable("id") long bookId) {
         Book b = bookService.findById(bookId);
-        List<? extends Comment> comments = commentService.findAllForBook(bookId)
+        List<Comment> comments = commentService.findAllForBook(bookId)
                 .stream()
                 .sorted((c1, c2) -> (int)(c1.getDate().getTime() - c2.getDate().getTime()))
                 .toList();
@@ -130,8 +130,8 @@ public class BookController {
     @GetMapping("/books/{id}/editor")
     public ModelAndView openBookEditor(@PathVariable("id") long bookId) {
         Book b = bookService.findById(bookId);
-        List<? extends Author> authors = authorService.findAll();
-        List<? extends Genre> genres = genreService.findAll();
+        List<Author> authors = authorService.findAll();
+        List<Genre> genres = genreService.findAll();
 
         var dto = new BookCreationDto(
                 b.getAuthor().getId(),
@@ -157,8 +157,8 @@ public class BookController {
     ) {
         if (bindingResult.hasErrors()) {
             Book b = bookService.findById(bookId);
-            List<? extends Author> authors = authorService.findAll();
-            List<? extends Genre> genres = genreService.findAll();
+            List<Author> authors = authorService.findAll();
+            List<Genre> genres = genreService.findAll();
             model.addAttribute("book", b);
             model.addAttribute("authors", authors);
             model.addAttribute("genres", genres);
@@ -172,8 +172,8 @@ public class BookController {
 
     @GetMapping("/books/creator")
     public ModelAndView openBookCreator() {
-        List<? extends Author> authors = authorService.findAll();
-        List<? extends Genre> genres = genreService.findAll();
+        List<Author> authors = authorService.findAll();
+        List<Genre> genres = genreService.findAll();
 
         var dto = new BookCreationDto(0, "", Set.of(1L));
 
@@ -192,8 +192,8 @@ public class BookController {
             Model model
     ) {
         if (bindingResult.hasErrors()) {
-            List<? extends Author> authors = authorService.findAll();
-            List<? extends Genre> genres = genreService.findAll();
+            List<Author> authors = authorService.findAll();
+            List<Genre> genres = genreService.findAll();
             model.addAttribute("authors", authors);
             model.addAttribute("genres", genres);
             return "bookCreator";

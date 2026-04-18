@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface GenreService {
-    List<? extends Genre> findAll();
+    List<Genre> findAll();
 
     Genre findById(long id);
 
