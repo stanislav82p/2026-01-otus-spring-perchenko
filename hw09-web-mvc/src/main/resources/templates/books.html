@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{title-library}">Библиотека</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters select,
+        .filters button {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* wrap_content */
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+        }
+
+        .table-footer {
+            margin-top: 10px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        .row {
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<a href="/api/library/books?lang=ru">ru</a>
+<a href="/api/library/books?lang=en">en</a>
+
+<h1 th:text="#{title-library}">Библиотека</h1>
+
+<div class="filters">
+    <form th:action="@{/api/library/books}" >
+        <label for="author_selector" th:text="#{select-author} + ': '">Select Author:</label>
+        <select id="author_selector" name="author_id">
+            <option value="0" th:text="#{value-any}">Any</option>
+            <option th:each="auth : ${authors}" th:value="${auth.id}" th:text="${auth.fullName}" th:selected="${auth.id==selected_author_id}"/>
+        </select>
+
+        <label for="genre_selector" th:text="#{select-genre} + ': '">Select Genre:</label>
+        <select id="genre_selector" name="genre_id">
+            <option value="0" th:text="#{value-any}">Any</option>
+            <option th:each="gen : ${genres}" th:value="${gen.id}" th:text="${gen.name}" th:selected="${gen.id==selected_genre_id}"/>
+        </select>
+
+        <button type="submit" th:text="#{action-apply-filter}">Применить фильтры</button>
+    </form>
+
+    <form action="/api/library/books">
+        <button type="submit" th:text="#{action-reset-filter}">Сбросить фильтры</button>
+    </form>
+</div>
+
+<div class="table-container">
+    <div class="table-title" th:text="#{title-books}">Книги</div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th th:text="#{property-title}">Название</th>
+            <th th:text="#{property-author}">Автор</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.id}" />
+            <td th:text="${book.title}" />
+            <td th:text="${book.author.fullName}" />
+            <td><a th:href="@{/api/library/books/{id}(id=${book.id})}" th:text="#{action-details}"/></td>
+            <td><a th:href="@{/api/library/books/{id}/delete(id=${book.id})}" th:text="#{action-delete}"/></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="table-footer" th:text="#{books-count} + ': ' + ${books.size()}+'     (authorId = '+${selected_author_id}+', genreId = '+${selected_genre_id}+')'">
+        Всего найдено книг: 5
+    </div>
+
+    <div class="row">
+        <form th:action="@{/api/library/books/creator}">
+            <button type="submit" th:text="#{action-add-book}">Добавить книгу</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <label th:text="#{action-view-all-authors} + ' '" >Посмотреть всех</label>
+    <a href="/api/library/authors" th:text="#{action-authors}" >авторов</a>
+</div>
+
+<div class="row">
+    <label th:text="#{action-view-all-genres} + ' '">Посмотреть все</label>
+    <a href="/api/library/genres" th:text="#{action-genres}" >жанры</a>
+</div>
+
+</body>
+</html>

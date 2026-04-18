@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Написать комментарий</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters select,
+        .filters button {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* wrap_content */
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+        }
+
+        .table-footer {
+            margin-top: 10px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<bod>
+    <h1 th:text="#{sure-to-delete} + ${book.title} + '?'">Вы действительно хотите удалить книгу ХХХХХХХХ?</h1>
+
+    <div class="row">
+        <form action="#" th:action="@{/api/library/books/{id}(id=${book.id})}" method="POST">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" th:text="#{action-yes}">Да, конечно</button>
+        </form>
+        <form action="#" th:action="@{/api/library/books/{id}(id=${book.id})}">
+            <button type="submit" th:text="#{action-no}">Нет, не нужно</button>
+        </form>
+    </div>
+</bod>
+
+</html>
