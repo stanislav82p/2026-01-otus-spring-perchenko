@@ -7,6 +7,7 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.entity.GenreEntity;
 import ru.otus.hw.models.dto.GenreDto;
 import ru.otus.hw.repositories.GenreRepository;
+import ru.otus.hw.services.localization.LocalizedMessagesService;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class GenreServiceImpl implements GenreService {
+
     private final GenreRepository genreRepository;
+
+    private final LocalizedMessagesService messageService;
 
     @Transactional(readOnly = true)
     @Override
@@ -32,7 +36,10 @@ public class GenreServiceImpl implements GenreService {
         if (result.isPresent()) {
             return GenreDto.fromGenre(result.get());
         } else {
-            throw new EntityNotFoundException("Жанр для ID %d не найден".formatted(id));
+            throw new EntityNotFoundException(
+                    "Жанр для ID %d не найден".formatted(id),
+                    messageService.getMessage("genres-not-found")
+            );
         }
     }
 

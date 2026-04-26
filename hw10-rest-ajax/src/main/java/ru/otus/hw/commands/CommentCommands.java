@@ -21,6 +21,7 @@ public class CommentCommands {
     private final CommentService commentService;
 
     private final ModelConverter<CommentDto> commentConverter;
+
     private final ModelConverter<CommentLightDto> commentLightConverter;
 
     @ShellMethod(value = "Find all comments", key = "allcomments")

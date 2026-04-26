@@ -1,4 +1,4 @@
-package ru.otus.hw.controller.dto;
+package ru.otus.hw.pages.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

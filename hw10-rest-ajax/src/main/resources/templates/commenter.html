@@ -61,13 +61,13 @@
     </style>
 </head>
 <body>
-<a href="/api/library/books" th:text="#{back-home}">Домой</a>
+<a href="/books" th:text="#{back-home}">Домой</a>
 
 <br/>
 
 <h1 th:text="#{write-comment-for-book} + ': ' + ${book.title}">Написать комментарий для книги: ???????</h1>
 
-<form id="comment-create-form" action="#" th:action="@{/api/library/comments(book_id=${book.id})}" th:method="post" th:object="${commentCreation}" >
+<form id="comment-create-form" action="#" th:action="@{/comments(book_id=${book.id})}" th:method="post" th:object="${commentCreation}" >
     <div class="row">
         <label for="reader_selector">Select Reader:</label>
         <select id="reader_selector" th:field="*{readerId}">

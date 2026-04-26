@@ -7,20 +7,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.dto.AuthorDto;
 import ru.otus.hw.models.dto.BookDto;
+import ru.otus.hw.services.localization.LocalizedMessagesService;
+import ru.otus.hw.services.localization.LocalizedMessagesServiceImpl;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 
 @DisplayName("Сервис для книг должен")
 @DataJpaTest
-@Import({BookServiceImpl.class})
+@Import({BookServiceImpl.class, LocalizedMessagesServiceImpl.class})
 @Transactional(propagation = Propagation.NEVER)
 public class BookServiceTest {
 
@@ -29,6 +34,9 @@ public class BookServiceTest {
 
     @Autowired
     private BookService bookService;
+
+    @MockitoBean
+    private LocalizedMessagesService messageService;
 
     @DisplayName("Должен загружать книгу по ID")
     @Test
@@ -65,6 +73,9 @@ public class BookServiceTest {
     void mustDeleteBookById() {
         BookDto book = bookService.findById(BOOK_ID_2);
 
+        var userMessage = "Book not found";
+        given(messageService.getMessage(eq("book-not-found"))).willReturn(userMessage);
+
         bookService.deleteById(BOOK_ID_2);
 
         var exception = Assertions.assertThrows(
@@ -72,5 +83,6 @@ public class BookServiceTest {
                 () -> bookService.findById(BOOK_ID_2)
         );
         assertThat(exception.getMessage()).isEqualTo("Book with ID %d not found".formatted(BOOK_ID_2));
+        assertThat(exception.getUserMessage()).isEqualTo(userMessage);
     }
 }

@@ -12,6 +12,7 @@ import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.ReaderRepository;
+import ru.otus.hw.services.localization.LocalizedMessagesService;
 import ru.otus.hw.utils.EntityId;
 
 import java.sql.Date;
@@ -27,6 +28,8 @@ public class CommentServiceImpl implements CommentService {
 
     private final ReaderRepository readerRepo;
 
+    private final LocalizedMessagesService messageService;
+
     @Transactional(readOnly = true)
     @Override
     public CommentDto findById(Long commentId) {
@@ -35,7 +38,10 @@ public class CommentServiceImpl implements CommentService {
         if (optComment.isPresent()) {
             return CommentDto.fromEntity(optComment.get());
         } else {
-            throw new EntityNotFoundException("Комментарий с ID %d не найден".formatted(commentId));
+            throw new EntityNotFoundException(
+                    "Комментарий с ID %d не найден".formatted(commentId),
+                    messageService.getMessage("comment-not-found")
+            );
         }
     }
 
@@ -50,7 +56,10 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> findAllForBook(Long bookId) {
         var book = bookRepo.findById(bookId);
         if (book.isEmpty()) {
-            throw new EntityNotFoundException("The book with ID %s was not found".formatted(bookId));
+            throw new EntityNotFoundException(
+                    "The book with ID %s was not found".formatted(bookId),
+                    messageService.getMessage("book-not-found")
+            );
         }
 
         return commentRepo.findByBook(book.get()).stream().map(CommentDto::fromEntity).toList();
@@ -60,11 +69,17 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDto> findAllForBookFromReader(Long bookId, Long readerId) {
         var book = bookRepo.findById(bookId).orElseThrow(
-                () -> new EntityNotFoundException("The book with ID %s was not found".formatted(bookId))
+                () -> new EntityNotFoundException(
+                        "The book with ID %s was not found".formatted(bookId),
+                        messageService.getMessage("book-not-found")
+                )
         );
 
         var reader = readerRepo.findById(readerId).orElseThrow(
-                () -> new EntityNotFoundException("The reader with ID %s was not found".formatted(readerId))
+                () -> new EntityNotFoundException(
+                        "The reader with ID %s was not found".formatted(readerId),
+                        messageService.getMessage("reader-not-found")
+                )
         );
 
         return commentRepo.findByReaderAndBook(reader, book)
@@ -89,11 +104,17 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto createComment(EntityId<ReaderEntity> readerId, EntityId<BookEntity> bookId, String text) {
         var book = bookRepo.findById(bookId.id).orElseThrow(
-                () -> new EntityNotFoundException("The book with ID %d was not found".formatted(bookId))
+                () -> new EntityNotFoundException(
+                        "The book with ID %d was not found".formatted(bookId),
+                        messageService.getMessage("book-not-found")
+                )
         );
 
         var reader = readerRepo.findById(readerId.id).orElseThrow(
-                () -> new EntityNotFoundException("The reader with ID %d was not found".formatted(readerId))
+                () -> new EntityNotFoundException(
+                        "The reader with ID %d was not found".formatted(readerId),
+                        messageService.getMessage("reader-not-found")
+                )
         );
 
         CommentEntity createdComment = commentRepo.saveAndFlush(
@@ -106,7 +127,10 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentLightDto updateComment(long commentId, String text) {
         CommentEntity originalComment = commentRepo.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Комментарий с ID %d не найден".formatted(commentId)));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Комментарий с ID %d не найден".formatted(commentId),
+                        messageService.getMessage("comment-not-found")
+                ));
 
         CommentEntity updComment = originalComment.toBuilder()
                 .text(text)

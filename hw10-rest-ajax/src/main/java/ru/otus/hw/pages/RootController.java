@@ -1,4 +1,4 @@
-package ru.otus.hw.controller;
+package ru.otus.hw.pages;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,10 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class RootController {
 
-    public static final String BASE_URL = "/api/library";
-
     @GetMapping("/")
     public String root() {
-        return "redirect:%s/books".formatted(BASE_URL);
+        return "redirect:/books";
     }
 }

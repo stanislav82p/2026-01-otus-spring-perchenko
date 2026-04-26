@@ -51,36 +51,59 @@
             margin-top: 10px;
         }
     </style>
+    <script>
+        function loadData() {
+            fetch('/api/library/genres')
+                .then(response => response.json())
+                .then(genres => {
+                    console.log("Got genres: ", genres.length);
+                    const table = document.getElementById("genres_table");
+                    const tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
+                    tbody.innerHTML = '';
+
+                    genres.forEach(genre => {
+                        console.log("Genre: ", genre);
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${genre.id}</td>
+                                <td>${genre.name}</td>
+                            </tr>
+                        `;
+                    });
+
+                    const footer = document.getElementById("table_footer");
+                    footer.innerHTML += genres.length;
+                });
+        }
+    </script>
 </head>
 <body>
-<a href="/api/library/books" th:text="#{back-home}">Домой</a>
+    <a href="/books" th:text="#{back-home}">Домой</a>
 
-<br/>
+    <br/>
 
-<h1 th:text="#{title-library}">Библиотека</h1>
+    <h1 th:text="#{title-library}">Библиотека</h1>
 
-<div class="table-container">
-    <div class="table-title" th:text="#{title-genres}">Жанры</div>
+    <div class="table-container">
+        <div class="table-title" th:text="#{title-genres}">Жанры</div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th th:text="#{property-title}">Название</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="g: ${genres}">
-            <td th:text="${g.id}" />
-            <td th:text="${g.name}" />
-        </tr>
-        </tbody>
-    </table>
+        <table id="genres_table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th th:text="#{property-title}">Название</th>
+            </tr>
+            </thead>
+        </table>
 
-    <div class="table-footer" th:text="#{all-genres-found} + ': ' + ${genres.size()}">
-        Всего найдено жанров: 5
+        <div class="table-footer" id="table_footer" th:text="#{all-genres-found} + ': '">
+            Всего найдено жанров: 5
+        </div>
     </div>
-</div>
+
+    <script>
+        loadData();
+    </script>
 
 </body>
 </html>

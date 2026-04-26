@@ -59,41 +59,137 @@
             margin-top: 10px;
         }
     </style>
+    <script>
+        function renderHTML(book, authors, genres) {
+            const bookGenres = book.genres.map(g => g.id);
+
+            const header = document.getElementById("title");
+            header.innerHTML += book.title;
+
+            const titleInput = document.getElementById("book_title_input");
+            const authorSelector = document.getElementById("book_author_select");
+            const genreSelector  = document.getElementById("book_genre_select");
+
+            titleInput.value = book.title;
+
+            authors.forEach(author => {
+                let opt = document.createElement("option");
+                opt.value = author.id;
+                opt.textContent = author.fullName;
+                opt.selected = (author.id == book.author.id);
+                authorSelector.appendChild(opt);
+            });
+
+            genres.forEach(genre => {
+                let opt = document.createElement("option");
+                opt.value = genre.id;
+                opt.textContent = genre.name;
+                opt.selected = bookGenres.includes(genre.id);
+                genreSelector.appendChild(opt);
+            });
+        }
+
+        function loadData(bookId) {
+            console.log("Loading data for Book ID: ", bookId);
+
+            let callBook = fetch(`/api/library/books/${bookId}`);
+            let callAuthors = fetch('/api/library/authors');
+            let callGenres  = fetch('/api/library/genres');
+
+            Promise.all([callBook, callAuthors, callGenres])
+                .then(values => Promise.all(values.map(value => value.json())))
+                .then(data => {
+                    const book = data[0];
+                    const authors = data[1];
+                    const genres  = data[2];
+
+                    console.log("Got book: ", book);
+                    console.log("Got Authors: ", authors.length, ", and Genres: ", genres.length);
+
+                    renderHTML(book, authors, genres);
+                });
+        }
+
+        function saveBook(bookId) {
+            console.log("Saving the book with ID: ", bookId);
+
+            const titleInput = document.getElementById("book_title_input");
+            const authorSelector = document.getElementById("book_author_select");
+            const genreSelector  = document.getElementById("book_genre_select");
+
+            const bookDto = {
+                bookTitle: titleInput.value,
+                authorId: authorSelector.value,
+                genreIds: Array.from(genreSelector.selectedOptions).map(opt => opt.value),
+            };
+
+            console.log("Book DTO: ", bookDto);
+
+            fetch(`/api/library/books/${bookId}`, {
+                method: 'PUT',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookDto)
+            }).then(response => {
+                console.log("Response = ", response);
+
+                if (response.ok) {
+                    window.location.replace(`/books/${bookId}`)
+                } else if (response.status >= 400 && response.status < 500) {
+                    return response.json();
+                }
+            }).then(body => {
+                console.log("Got client error ", body);
+                if (body.requestValidationErrors != null) {
+                    body.requestValidationErrors.forEach(err => {
+                        console.log(err.code, " -> ", err.text);
+                        if (err.code.endsWith("bookTitle")) {
+                            const titleError = document.getElementById("title_error");
+                            titleError.innerHTML = err.text;
+                        } else if (err.code.endsWith("genreIds")) {
+                            const genresError = document.getElementById("genres_error");
+                            genresError.innerHTML = err.text;
+                        }
+                    });
+                }
+            });
+        }
+    </script>
 </head>
 <body>
-    <a href="/api/library/books" th:text="#{back-home}">Домой</a>
+    <a href="/books" th:text="#{back-home}">Домой</a>
     <br/>
-    <h1 th:text="#{edit-the-book} + ': ' + ${book.title}">Редактировать книгу: ???????</h1>
+    <h1 id="title" th:text="#{edit-the-book} + ': '">Редактировать книгу: ???????</h1>
 
-    <form id="edit-form" action="bookEditor.html" th:action="@{/api/library/books/{id}/editor(id=${book.id})}" th:method="POST" th:object="${edtBook}">
-
-        <div class="row">
-            <label for="book-title-input" th:text="#{input-book-title} + ':'">Название книги:</label>
-            <input id="book-title-input" name="bookTitle" type="text" th:value="*{bookTitle}" value="Евгений Онегин"/>
-            <div class="errors" th:if="${#fields.hasErrors('bookTitle')}" th:errors="*{bookTitle}">Ошибочка вышла</div>
+    <form id="edit_form">
+        <div class="row" >
+            <label for="book_title_input" th:text="#{input-book-title} + ':'">Название книги:</label>
+            <input id="book_title_input" type="text" />
+            <div class="errors" id="title_error" ></div>
         </div>
 
         <div class="row">
-            <label for="book-author-input" th:text="#{input-book-author} + ':'">Автор книги:</label>
-            <select id="book-author-input" th:field="*{authorId}">
-                <option th:each="auth : ${authors}" th:value="${auth.id}" th:text="${auth.fullName}" th:selected="*{authorId}"/>
-            </select>
+            <label for="book_author_select" th:text="#{input-book-author} + ':'">Автор книги:</label>
+            <select id="book_author_select" ></select>
         </div>
 
         <div class="row">
-            <label for="book-genres-select" th:text="#{input-book-genres} + ':'">Жанры книги:</label>
-            <select id="book-genres-select" name="genreIds" multiple>
-                <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}" th:selected="${edtBook.genreIds.contains(genre.id)}"/>
-            </select>
+            <label for="book_genre_select" th:text="#{input-book-genres} + ':'">Жанры книги:</label>
+            <select id="book_genre_select" multiple></select>
+            <div class="errors" id="genres_error" ></div>
         </div>
 
         <div class="row">
-            <button type="submit" th:text="#{save-button-caption}">Сохранить</button>
-            <a href="#" th:href="@{/api/library/books/{id}(id=${book.id})}">
+            <button type="button" th:onclick="'saveBook(' + ${book_id} + ')'" th:text="#{save-button-caption}">Сохранить</button>
+            <a href="#" th:href="@{/books/{id}(id=${book_id})}">
                 <button type="button" th:text="#{cancel-button-caption}">Отменить</button>
             </a>
         </div>
     </form>
+
+    <script th:text="'loadData(' + ${book_id} + ')'"></script>
 
 </body>
 </html>

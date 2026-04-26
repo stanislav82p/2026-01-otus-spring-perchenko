@@ -59,20 +59,35 @@
             margin-top: 10px;
         }
     </style>
+    <script>
+        function deleteBook(bookId) {
+            console.log("Called deleteDook() for ID: ", bookId);
+            fetch(`/api/library/books/${bookId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                console.log("Response = ", response);
+                if (response.ok) {
+                    window.location.replace("/books")
+                }
+            });
+        }
+    </script>
 </head>
 
-<bod>
+<body>
     <h1 th:text="#{sure-to-delete} + ${book.title} + '?'">Вы действительно хотите удалить книгу ХХХХХХХХ?</h1>
 
     <div class="row">
-        <form action="#" th:action="@{/api/library/books/{id}(id=${book.id})}" method="POST">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" th:text="#{action-yes}">Да, конечно</button>
-        </form>
-        <form action="#" th:action="@{/api/library/books/{id}(id=${book.id})}">
+
+        <button type="button" th:onclick="'deleteBook(' + ${book.id} + ')'" th:text="#{action-yes}">Да, конечно</button>
+
+        <form action="#" th:action="@{/books/{id}(id=${book.id})}">
             <button type="submit" th:text="#{action-no}">Нет, не нужно</button>
         </form>
     </div>
-</bod>
+</body>
 
 </html>

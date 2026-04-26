@@ -51,9 +51,34 @@
             margin-top: 10px;
         }
     </style>
+    <script>
+        function loadData() {
+            fetch('/api/library/authors')
+                .then(response => response.json())
+                .then(authors => {
+                    console.log("Got authors: ", authors.length);
+                    const table = document.getElementById("authors_table");
+                    const tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
+                    tbody.innerHTML = '';
+
+                    authors.forEach(author => {
+                        console.log("Author: ", author);
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${author.id}</td>
+                                <td>${author.fullName}</td>
+                            </tr>
+                        `;
+                    });
+
+                    const footer = document.getElementById("table_footer");
+                    footer.innerHTML += authors.length;
+                });
+        }
+    </script>
 </head>
 <body>
-    <a href="/api/library/books" th:text="#{back-home}">Домой</a>
+    <a href="/books" th:text="#{back-home}">Домой</a>
 
     <br/>
 
@@ -62,25 +87,24 @@
     <div class="table-container">
         <div class="table-title" th:text="#{title-authors}">Авторы</div>
 
-        <table>
+        <table id="authors_table">
             <thead>
             <tr>
                 <th>ID</th>
                 <th th:text="#{property-name}">Имя</th>
             </tr>
             </thead>
-            <tbody>
-            <tr th:each="author : ${authors}">
-                <td th:text="${author.id}" />
-                <td th:text="${author.fullName}" />
-            </tr>
-            </tbody>
         </table>
 
-        <div class="table-footer" th:text="#{authors-found} + ': ' + ${authors.size()}">
+        <div class="table-footer" id="table_footer" th:text="#{authors-found} + ': '">
             Всего найдено авторов: 5
         </div>
+
     </div>
+
+    <script>
+        loadData();
+    </script>
 
 </body>
 </html>

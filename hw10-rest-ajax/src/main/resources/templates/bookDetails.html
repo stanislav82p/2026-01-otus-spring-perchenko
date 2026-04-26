@@ -53,7 +53,7 @@
     </style>
 </head>
 <body>
-<a href="/api/library/books" th:text="#{back-home}">Home</a>
+<a href="/books" th:text="#{back-home}">Home</a>
 
 <br/>
 
@@ -90,7 +90,7 @@
     </table>
 
     <div class="row">
-        <form th:action="@{/api/library/books/{id}/editor(id=${book.id})}">
+        <form th:action="@{/books/{id}/editor(id=${book.id})}">
             <button type="submit" th:text="#{action-edit-book}">Редактировать книгу</button>
         </form>
     </div>
@@ -103,7 +103,7 @@
 <div class="table-container">
     <div class="table-title" th:text="#{title-comments}">Комментарии</div>
 
-    <form th:action="@{/api/library/books/{id}/commenter(id=${book.id})}">
+    <form th:action="@{/books/{id}/commenter(id=${book.id})}">
         <button type="submit" th:text="#{action-create-new}">Создать новый</button>
     </form>
 

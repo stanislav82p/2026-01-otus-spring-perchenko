@@ -11,6 +11,7 @@ import ru.otus.hw.models.entity.GenreEntity;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
+import ru.otus.hw.services.localization.LocalizedMessagesService;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,8 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final LocalizedMessagesService messageService;
+
     @Transactional(readOnly = true)
     @Override
     public BookDto findById(long id) {
@@ -34,7 +37,10 @@ public class BookServiceImpl implements BookService {
         if (optBook.isPresent()) {
             return BookDto.fromEntity(optBook.get());
         } else {
-            throw new EntityNotFoundException("Book with ID %d not found".formatted(id));
+            throw new EntityNotFoundException(
+                    "Book with ID %d not found".formatted(id),
+                    messageService.getMessage("book-not-found")
+            );
         }
     }
 
@@ -90,14 +96,21 @@ public class BookServiceImpl implements BookService {
         if (isEmpty(genresIds)) {
             throw new IllegalArgumentException("Genres ids must not be null");
         }
-
-        var author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
+        if (id > 0) {
+            bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
+                    "Book with id %d not found for update".formatted(id),
+                    messageService.getMessage("book-not-found"))
+            );
+        }
+        var author = authorRepository.findById(authorId).orElseThrow(() -> new EntityNotFoundException(
+                "Author with id %d not found".formatted(authorId),
+                messageService.getMessage("author-not-found")));
         var genres = genreRepository.findByIdIn(genresIds);
         if (isEmpty(genres) || genresIds.size() != genres.size()) {
-            throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
+            throw new EntityNotFoundException(
+                    "One or all genres with ids %s not found".formatted(genresIds),
+                    messageService.getMessage("genres-not-found"));
         }
-
         var bookToSave = new BookEntity(id, title, author, genres);
         BookEntity savedBook = bookRepository.save(bookToSave);
         return BookDto.fromEntity(savedBook);

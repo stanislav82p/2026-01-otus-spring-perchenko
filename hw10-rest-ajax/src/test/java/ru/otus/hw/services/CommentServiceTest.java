@@ -12,6 +12,7 @@ import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.models.dto.CommentLightDto;
 import ru.otus.hw.models.entity.BookEntity;
 import ru.otus.hw.models.entity.ReaderEntity;
+import ru.otus.hw.services.localization.LocalizedMessagesServiceImpl;
 import ru.otus.hw.utils.EntityId;
 
 import java.util.List;
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Сервис для комментариев должен")
 @DataJpaTest
-@Import({CommentServiceImpl.class})
+@Import({CommentServiceImpl.class, LocalizedMessagesServiceImpl.class})
 @Transactional(propagation = Propagation.NEVER)
 public class CommentServiceTest {
 

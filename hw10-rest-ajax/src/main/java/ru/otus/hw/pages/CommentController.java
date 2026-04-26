@@ -1,4 +1,4 @@
-package ru.otus.hw.controller;
+package ru.otus.hw.pages;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +7,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
-import ru.otus.hw.controller.dto.CommentCreationDto;
+import ru.otus.hw.pages.dto.CommentCreationDto;
 import ru.otus.hw.models.dto.BookDto;
 import ru.otus.hw.models.dto.ReaderDto;
 import ru.otus.hw.models.entity.BookEntity;
@@ -24,10 +23,7 @@ import ru.otus.hw.utils.EntityId;
 
 import java.util.List;
 
-import static ru.otus.hw.controller.RootController.BASE_URL;
-
 @Controller
-@RequestMapping(BASE_URL)
 public class CommentController {
 
     private final BookService bookService;
@@ -76,6 +72,6 @@ public class CommentController {
 
         commentService.createComment(rId, bId, commentCreation.getCommentText());
 
-        return "redirect:%s/books/%d".formatted(BASE_URL, bookId);
+        return "redirect:/books/%d".formatted(bookId);
     }
 }

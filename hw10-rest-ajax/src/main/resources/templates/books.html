@@ -59,66 +59,108 @@
             margin-top: 24px;
         }
     </style>
+
+    <script>
+        function loadBooksWithParams() {
+            const authorSelector = document.getElementById("author_selector");
+            const genreSelector = document.getElementById("genre_selector");
+
+            const authorId = authorSelector.value;
+            const genreId = genreSelector.value;
+
+            const params = new URLSearchParams();
+            params.append('author_id', authorId);
+            params.append('genre_id', genreId);
+
+            fetch(`api/library/books?${params}`)
+                .then(data => data.json())
+                .then(data => {
+                    console.log(data.books);
+                    const table = document.getElementById("books_table");
+                    const tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
+
+                    tbody.innerHTML = '';
+                    data.books.forEach(book => {
+                        console.log(book);
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${book.id}</td>
+                                <td>${book.title}</td>
+                                <td>${book.author.fullName}</td>
+                                <td><a href="/books/${book.id}">${data.actionDetails}</a></td>
+                                <td><a href="/books/${book.id}/delete">${data.actionDelete}</a></td>
+                            </tr>
+                        `;
+                    });
+
+                    const footer = document.getElementById("table_footer");
+                    footer.innerHTML = data.summary;
+
+                })
+        }
+
+        function clearFiltersAndReload() {
+            const authorSelector = document.getElementById("author_selector");
+            const genreSelector = document.getElementById("genre_selector");
+            authorSelector.value = 0;
+            genreSelector.value = 0;
+
+            loadBooksWithParams();
+        }
+    </script>
 </head>
 <body>
 
-<a href="/api/library/books?lang=ru">ru</a>
-<a href="/api/library/books?lang=en">en</a>
+<a href="/books?lang=ru">ru</a>
+<a href="/books?lang=en">en</a>
 
 <h1 th:text="#{title-library}">Библиотека</h1>
 
 <div class="filters">
-    <form th:action="@{/api/library/books}" >
+    <form action="#" >
         <label for="author_selector" th:text="#{select-author} + ': '">Select Author:</label>
         <select id="author_selector" name="author_id">
             <option value="0" th:text="#{value-any}">Any</option>
-            <option th:each="auth : ${authors}" th:value="${auth.id}" th:text="${auth.fullName}" th:selected="${auth.id==selected_author_id}"/>
+            <option th:each="auth : ${authors}" th:value="${auth.id}" th:text="${auth.fullName}" th:selected="${auth.id==0}"/>
         </select>
 
         <label for="genre_selector" th:text="#{select-genre} + ': '">Select Genre:</label>
         <select id="genre_selector" name="genre_id">
             <option value="0" th:text="#{value-any}">Any</option>
-            <option th:each="gen : ${genres}" th:value="${gen.id}" th:text="${gen.name}" th:selected="${gen.id==selected_genre_id}"/>
+            <option th:each="gen : ${genres}" th:value="${gen.id}" th:text="${gen.name}" th:selected="${gen.id==0}"/>
         </select>
 
-        <button type="submit" th:text="#{action-apply-filter}">Применить фильтры</button>
+        <button type="button" onclick="loadBooksWithParams()" th:text="#{action-apply-filter}">Применить фильтры</button>
     </form>
 
-    <form action="/api/library/books">
-        <button type="submit" th:text="#{action-reset-filter}">Сбросить фильтры</button>
+    <form action="#">
+        <button type="button" onclick="clearFiltersAndReload()" th:text="#{action-reset-filter}">Сбросить фильтры</button>
     </form>
 </div>
 
 <div class="table-container">
     <div class="table-title" th:text="#{title-books}">Книги</div>
 
-    <table>
+    <table id="books_table">
         <thead>
         <tr>
             <th>ID</th>
             <th th:text="#{property-title}">Название</th>
             <th th:text="#{property-author}">Автор</th>
-            <th></th>
-            <th></th>
+            <th/>
+            <th/>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="book : ${books}">
-            <td th:text="${book.id}" />
-            <td th:text="${book.title}" />
-            <td th:text="${book.author.fullName}" />
-            <td><a th:href="@{/api/library/books/{id}(id=${book.id})}" th:text="#{action-details}"/></td>
-            <td><a th:href="@{/api/library/books/{id}/delete(id=${book.id})}" th:text="#{action-delete}"/></td>
-        </tr>
         </tbody>
     </table>
 
-    <div class="table-footer" th:text="#{books-count} + ': ' + ${books.size()}+'     (authorId = '+${selected_author_id}+', genreId = '+${selected_genre_id}+')'">
+    <div class="table-footer" id="table_footer">
         Всего найдено книг: 5
     </div>
 
     <div class="row">
-        <form th:action="@{/api/library/books/creator}">
+        <form th:action="@{/books/creator}">
             <button type="submit" th:text="#{action-add-book}">Добавить книгу</button>
         </form>
     </div>
@@ -126,13 +168,18 @@
 
 <div class="row">
     <label th:text="#{action-view-all-authors} + ' '" >Посмотреть всех</label>
-    <a href="/api/library/authors" th:text="#{action-authors}" >авторов</a>
+    <a href="/authors" th:text="#{action-authors}" >авторов</a>
 </div>
 
 <div class="row">
     <label th:text="#{action-view-all-genres} + ' '">Посмотреть все</label>
-    <a href="/api/library/genres" th:text="#{action-genres}" >жанры</a>
+    <a href="/genres" th:text="#{action-genres}" >жанры</a>
 </div>
+
+<script>
+    clearFiltersAndReload()
+</script>
+
 
 </body>
 </html>
