@@ -51,6 +51,57 @@
             margin-top: 10px;
         }
     </style>
+
+    <script>
+        function renderHTML(book, comments) {
+            document.getElementById("book_title_cell").innerText = book.title;
+            document.getElementById("book_author_cell").innerText = book.author.fullName;
+            document.getElementById("book_ncomments_cell").innerText = comments.length;
+
+            const cell_genres = document.getElementById("book_genres_cell");
+            cell_genres.innerHTML = '';
+            book.genres.forEach(genre => {
+                cell_genres.innerHTML += `
+                    <li>${genre.name}</li>
+                `;
+            });
+
+            const tableComments = document.getElementById("comments_table");
+            const tbodyComments = tableComments.querySelector('tbody') || tableComments.appendChild(document.createElement('tbody'));
+
+            tbodyComments.innerHTML = '';
+            comments.forEach(comment => {
+                console.log(comment);
+                tbodyComments.innerHTML += `
+                            <tr>
+                                <td>${comment.id}</td>
+                                <td>${comment.reader.fullName}</td>
+                                <td>${comment.date}</td>
+                                <td>${comment.text}</td>
+                            </tr>
+                        `;
+            });
+        }
+
+        function loadData(bookId) {
+            console.log("Loading data for Book ID: ", bookId);
+
+            let callBook = fetch(`/api/library/books/${bookId}`);
+            let callComments = fetch(`/api/library/comments?book_id=${bookId}`);
+
+            Promise.all([callBook, callComments])
+                .then(values => Promise.all(values.map(value => value.json())))
+                .then(data => {
+                    const book = data[0];
+                    const comments = data[1];
+
+                    console.log("Got book: ", book);
+                    console.log("Got Comments: ", comments.length);
+
+                    renderHTML(book, comments);
+                });
+        }
+    </script>
 </head>
 <body>
 <a href="/books" th:text="#{back-home}">Home</a>
@@ -66,31 +117,29 @@
         <tbody>
             <tr>
                 <td>ID</td>
-                <td th:text="${book.id}">1</td>
+                <td th:text="${book_id}">1</td>
             </tr>
             <tr>
                 <td th:text="#{property-title}">Название</td>
-                <td th:text="${book.title}" />
+                <td id="book_title_cell" >book_title</td>
             </tr>
             <tr>
                 <td th:text="#{property-author}">Автор</td>
-                <td th:text="${book.author.fullName}" />
+                <td id="book_author_cell" >book_author</td>
             </tr>
             <tr>
                 <td th:text="#{property-genres}">Жанры</td>
-                <td>
-                    <li th:each="genre : ${book.genres}" th:text="${genre.name}" />
-                </td>
+                <td id="book_genres_cell" >book_genres</td>
             </tr>
             <tr>
                 <td th:text="#{num-comments}">N комментариев</td>
-                <td th:text="${comments.size()}" />
+                <td id="book_ncomments_cell" >N_comments</td>
             </tr>
         </tbody>
     </table>
 
     <div class="row">
-        <form th:action="@{/books/{id}/editor(id=${book.id})}">
+        <form th:action="@{/books/{id}/editor(id=${book_id})}">
             <button type="submit" th:text="#{action-edit-book}">Редактировать книгу</button>
         </form>
     </div>
@@ -103,13 +152,13 @@
 <div class="table-container">
     <div class="table-title" th:text="#{title-comments}">Комментарии</div>
 
-    <form th:action="@{/books/{id}/commenter(id=${book.id})}">
+    <form th:action="@{/books/{id}/commenter(id=${book_id})}">
         <button type="submit" th:text="#{action-create-new}">Создать новый</button>
     </form>
 
     <br/>
 
-    <table>
+    <table id="comments_table">
         <thead>
         <tr>
             <th>ID</th>
@@ -118,17 +167,11 @@
             <th th:text="#{property-comment}">Комментарий</th>
         </tr>
         </thead>
-        <tbody>
-        <tr th:each="comment : ${comments}">
-            <td th:text="${comment.id}" />
-            <td th:text="${comment.reader.fullName}" />
-            <td th:text="${comment.date}" />
-            <td th:text="${comment.text}" />
-        </tr>
-        </tbody>
     </table>
 
 </div>
+
+<script th:text="'loadData(' + ${book_id} + ')'"></script>
 
 </body>
 </html>

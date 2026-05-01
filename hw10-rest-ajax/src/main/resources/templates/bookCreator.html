@@ -99,7 +99,8 @@
                 });
         }
 
-        function saveBook(bookId) {
+        function createBook() {
+            console.log("Start creating book");
 
             const titleInput = document.getElementById("book_title_input");
             const authorSelector = document.getElementById("book_author_select");
@@ -170,8 +171,8 @@
         </div>
 
         <div class="row">
-            <button type="button" th:onclick="'saveBook(' + ${book_id} + ')'" th:text="#{save-button-caption}">Сохранить</button>
-            <a href="#" th:href="@{/books/{id}(id=${book_id})}">
+            <button type="button" onclick="createBook()" th:text="#{save-button-caption}">Сохранить</button>
+            <a href="/books">
                 <button type="button" th:text="#{cancel-button-caption}">Отменить</button>
             </a>
         </div>

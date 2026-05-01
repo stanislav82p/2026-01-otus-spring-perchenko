@@ -60,6 +60,22 @@
         }
     </style>
     <script>
+        function loadData(bookId) {
+            console.log("Loading data for Book ID: ", bookId);
+
+            const header = document.getElementById("title");
+            const btnDelete = document.getElementById("btn_delete");
+
+            btnDelete.disabled = true
+
+            fetch(`/api/library/books/${bookId}`)
+                .then(response => response.json())
+                .then(book => {
+                    header.innerHTML += ": " + book.title + "?";
+                    btnDelete.disabled = false
+                });
+        }
+
         function deleteBook(bookId) {
             console.log("Called deleteDook() for ID: ", bookId);
             fetch(`/api/library/books/${bookId}`, {
@@ -78,16 +94,18 @@
 </head>
 
 <body>
-    <h1 th:text="#{sure-to-delete} + ${book.title} + '?'">Вы действительно хотите удалить книгу ХХХХХХХХ?</h1>
+    <h1 id="title" th:text="#{sure-to-delete-book}">Вы действительно хотите удалить книгу ХХХХХХХХ?</h1>
 
     <div class="row">
 
-        <button type="button" th:onclick="'deleteBook(' + ${book.id} + ')'" th:text="#{action-yes}">Да, конечно</button>
+        <button id="btn_delete" type="button" th:onclick="'deleteBook(' + ${book_id} + ')'" th:text="#{action-yes}">Да, конечно</button>
 
-        <form action="#" th:action="@{/books/{id}(id=${book.id})}">
+        <form action="#" th:action="@{/books/{id}(id=${book_id})}">
             <button type="submit" th:text="#{action-no}">Нет, не нужно</button>
         </form>
     </div>
+
+    <script th:text="'loadData(' + ${book_id} + ')'"></script>
 </body>
 
 </html>

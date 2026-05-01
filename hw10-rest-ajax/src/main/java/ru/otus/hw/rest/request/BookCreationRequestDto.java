@@ -11,7 +11,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @Data
-public class BookCreationDto {
+public class BookCreationRequestDto {
 
     @NotBlank(message = "{book-title-not-blank}")
     @Size(min = 5, max = 50, message = "{book-title-expected-size}")

@@ -17,6 +17,7 @@ import ru.otus.hw.utils.EntityId;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -63,6 +64,18 @@ public class CommentServiceImpl implements CommentService {
         }
 
         return commentRepo.findByBook(book.get()).stream().map(CommentDto::fromEntity).toList();
+    }
+
+    public List<CommentDto> findAllFromReader(Long readerId) {
+        Optional<ReaderEntity> reader = readerRepo.findById(readerId);
+        if (reader.isEmpty()) {
+            throw new EntityNotFoundException(
+                    "The reader with ID %s was not found".formatted(readerId),
+                    messageService.getMessage("reader-not-found")
+            );
+        }
+
+        return commentRepo.findByReader(reader.get()).stream().map(CommentDto::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)

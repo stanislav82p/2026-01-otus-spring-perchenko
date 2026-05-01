@@ -16,6 +16,8 @@ public interface CommentService {
 
     List<CommentDto> findAllForBook(Long bookId);
 
+    List<CommentDto> findAllFromReader(Long readerId);
+
     List<CommentDto> findAllForBookFromReader(Long bookId, Long readerId);
 
     void deleteById(Long commentId);

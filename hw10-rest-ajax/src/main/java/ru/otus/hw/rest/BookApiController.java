@@ -3,7 +3,6 @@ package ru.otus.hw.rest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,13 +14,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.otus.hw.models.dto.BookDto;
-import ru.otus.hw.rest.request.BookCreationDto;
-import ru.otus.hw.rest.response.BookUpdateResponseDto;
+import ru.otus.hw.rest.request.BookCreationRequestDto;
+import ru.otus.hw.rest.response.EntityUpdateResponseDto;
 import ru.otus.hw.rest.response.GetBooksResponseDto;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.localization.LocalizedMessagesService;
 
 import java.util.List;
+
+import static ru.otus.hw.rest.utils.BadEntityResponseProvider.getBadEntityResponse;
 
 @RestController
 public class BookApiController {
@@ -73,41 +74,27 @@ public class BookApiController {
     }
 
     @PutMapping(path = "/api/library/books/{id}")
-    public ResponseEntity<BookUpdateResponseDto> updateBook(
+    public ResponseEntity<EntityUpdateResponseDto<BookDto>> updateBook(
             @PathVariable("id") long bookId,
-            @Valid @RequestBody BookCreationDto dto,
+            @Valid @RequestBody BookCreationRequestDto dto,
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
-            var errors = bindingResult.getAllErrors()
-                    .stream()
-                    .map(it -> new BookUpdateResponseDto.ErrorItem(it.getCodes()[0], it.getDefaultMessage()))
-                    .toList();
-
-            return ResponseEntity
-                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(new BookUpdateResponseDto(null, errors));
+            return getBadEntityResponse(bindingResult);
         }
         BookDto updBook = bookService.update(bookId, dto.getBookTitle(), dto.getAuthorId(), dto.getGenreIds());
-        return ResponseEntity.ok(new BookUpdateResponseDto(updBook, null));
+        return ResponseEntity.ok(new EntityUpdateResponseDto<>(updBook, null));
     }
 
     @PostMapping(path = "/api/library/books")
-    public ResponseEntity<BookUpdateResponseDto> createBook(
-            @Valid @RequestBody BookCreationDto dto,
+    public ResponseEntity<EntityUpdateResponseDto<BookDto>> createBook(
+            @Valid @RequestBody BookCreationRequestDto dto,
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
-            var errors = bindingResult.getAllErrors()
-                    .stream()
-                    .map(it -> new BookUpdateResponseDto.ErrorItem(it.getCodes()[0], it.getDefaultMessage()))
-                    .toList();
-
-            return ResponseEntity
-                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(new BookUpdateResponseDto(null, errors));
+            return getBadEntityResponse(bindingResult);
         }
         BookDto book = bookService.insert(dto.getBookTitle(), dto.getAuthorId(), dto.getGenreIds());
-        return ResponseEntity.ok(new BookUpdateResponseDto(book, null));
+        return ResponseEntity.ok(new EntityUpdateResponseDto<>(book, null));
     }
 }

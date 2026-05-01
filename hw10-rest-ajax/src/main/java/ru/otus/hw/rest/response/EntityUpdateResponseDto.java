@@ -3,16 +3,15 @@ package ru.otus.hw.rest.response;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
-import ru.otus.hw.models.dto.BookDto;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Getter
-public class BookUpdateResponseDto {
+public class EntityUpdateResponseDto<T> {
 
     @Nullable
-    private final BookDto book;
+    private final T entity;
 
     @Nullable
     private final List<ErrorItem> requestValidationErrors;
