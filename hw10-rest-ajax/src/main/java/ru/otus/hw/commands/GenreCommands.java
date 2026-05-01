@@ -1,0 +1,41 @@
+package ru.otus.hw.commands;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import ru.otus.hw.converters.ModelConverter;
+import ru.otus.hw.models.dto.GenreDto;
+import ru.otus.hw.services.GenreService;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
+@ShellComponent
+public class GenreCommands {
+
+    private final GenreService genreService;
+
+    private final ModelConverter<GenreDto> genreConverter;
+
+    @ShellMethod(value = "Find all genres", key = "ag")
+    public String findAllGenres() {
+        return genreService.findAll().stream()
+                .map(genreConverter::convertToString)
+                .collect(Collectors.joining("," + System.lineSeparator()));
+    }
+
+    @ShellMethod(value = "Find genre by ID", key = "gid")
+    public String findGenreById(long id) {
+        var genre = genreService.findById(id);
+        return genreConverter.convertToString(genre);
+    }
+
+    @ShellMethod(value = "Find all genres", key = "gids")
+    public String findGenresByIds(Long... ids) {
+        return genreService.findByIds(new HashSet<>(Arrays.asList(ids))).values().stream()
+                .map(genreConverter::convertToString)
+                .collect(Collectors.joining("," + System.lineSeparator()));
+    }
+}

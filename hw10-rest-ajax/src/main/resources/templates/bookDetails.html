@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{title-book-details}">Детали книги</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters select,
+        .filters button {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* wrap_content */
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+        }
+
+        .table-footer {
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        function renderHTML(book, comments) {
+            document.getElementById("book_title_cell").innerText = book.title;
+            document.getElementById("book_author_cell").innerText = book.author.fullName;
+            document.getElementById("book_ncomments_cell").innerText = comments.length;
+
+            const cell_genres = document.getElementById("book_genres_cell");
+            cell_genres.innerHTML = '';
+            book.genres.forEach(genre => {
+                cell_genres.innerHTML += `
+                    <li>${genre.name}</li>
+                `;
+            });
+
+            const tableComments = document.getElementById("comments_table");
+            const tbodyComments = tableComments.querySelector('tbody') || tableComments.appendChild(document.createElement('tbody'));
+
+            tbodyComments.innerHTML = '';
+            comments.forEach(comment => {
+                console.log(comment);
+                tbodyComments.innerHTML += `
+                            <tr>
+                                <td>${comment.id}</td>
+                                <td>${comment.reader.fullName}</td>
+                                <td>${comment.date}</td>
+                                <td>${comment.text}</td>
+                            </tr>
+                        `;
+            });
+        }
+
+        function loadData(bookId) {
+            console.log("Loading data for Book ID: ", bookId);
+
+            let callBook = fetch(`/api/library/books/${bookId}`);
+            let callComments = fetch(`/api/library/comments?book_id=${bookId}`);
+
+            Promise.all([callBook, callComments])
+                .then(values => Promise.all(values.map(value => value.json())))
+                .then(data => {
+                    const book = data[0];
+                    const comments = data[1];
+
+                    console.log("Got book: ", book);
+                    console.log("Got Comments: ", comments.length);
+
+                    renderHTML(book, comments);
+                });
+        }
+    </script>
+</head>
+<body>
+<a href="/books" th:text="#{back-home}">Home</a>
+
+<br/>
+
+<h1 th:text="#{title-book}">Книга</h1>
+
+<div class="table-container">
+    <div class="table-title" th:text="#{title-details}">Детали</div>
+
+    <table>
+        <tbody>
+            <tr>
+                <td>ID</td>
+                <td th:text="${book_id}">1</td>
+            </tr>
+            <tr>
+                <td th:text="#{property-title}">Название</td>
+                <td id="book_title_cell" >book_title</td>
+            </tr>
+            <tr>
+                <td th:text="#{property-author}">Автор</td>
+                <td id="book_author_cell" >book_author</td>
+            </tr>
+            <tr>
+                <td th:text="#{property-genres}">Жанры</td>
+                <td id="book_genres_cell" >book_genres</td>
+            </tr>
+            <tr>
+                <td th:text="#{num-comments}">N комментариев</td>
+                <td id="book_ncomments_cell" >N_comments</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="row">
+        <form th:action="@{/books/{id}/editor(id=${book_id})}">
+            <button type="submit" th:text="#{action-edit-book}">Редактировать книгу</button>
+        </form>
+    </div>
+
+</div>
+
+<br/>
+<br/>
+
+<div class="table-container">
+    <div class="table-title" th:text="#{title-comments}">Комментарии</div>
+
+    <form th:action="@{/books/{id}/commenter(id=${book_id})}">
+        <button type="submit" th:text="#{action-create-new}">Создать новый</button>
+    </form>
+
+    <br/>
+
+    <table id="comments_table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th th:text="#{property-reader}">Читатель</th>
+            <th th:text="#{property-date}">Дата</th>
+            <th th:text="#{property-comment}">Комментарий</th>
+        </tr>
+        </thead>
+    </table>
+
+</div>
+
+<script th:text="'loadData(' + ${book_id} + ')'"></script>
+
+</body>
+</html>
