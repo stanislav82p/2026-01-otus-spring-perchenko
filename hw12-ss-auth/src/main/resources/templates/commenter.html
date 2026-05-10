@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{title-write-comment}">Написать комментарий</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters select,
+        .filters button {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* wrap_content */
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+        }
+
+        .table-footer {
+            margin-top: 10px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        function renderHTML(book, readers) {
+            document.getElementById("title").innerHTML += book.title;
+
+            const readerSelector = document.getElementById("reader_selector");
+
+            let noSel = document.createElement("option");
+                noSel.value = 0;
+                noSel.textContent = "not selected";
+                noSel.selected = true;
+                readerSelector.appendChild(noSel);
+
+            readers.forEach(reader => {
+                let opt = document.createElement("option");
+                opt.value = reader.id;
+                opt.textContent = reader.fullName;
+                opt.selected = false;
+                readerSelector.appendChild(opt);
+            });
+        }
+
+        function loadData(bookId) {
+            console.log("Start loading data for bookId = ", bookId);
+            let callBook = fetch(`/api/library/books/${bookId}`);
+            let callReaders  = fetch('/api/library/readers');
+
+            Promise.all([callBook, callReaders])
+                .then(values => Promise.all(values.map(value => value.json())))
+                .then(data => {
+                    const book = data[0];
+                    const readers  = data[1];
+
+                    console.log("Got book: ", book, ", and Readers: ", readers.length);
+
+                    renderHTML(book, readers);
+                });
+        }
+
+        function makeComment(bookId) {
+            console.log("Start create comment for bookId = ", bookId);
+
+            const textInput = document.getElementById("comment_text_input");
+            const readerInput = document.getElementById("reader_selector");
+
+            const commentDto = {
+                readerId: readerInput.value,
+                bookId: bookId,
+                text: textInput.value,
+            };
+
+            console.log("Comment DTO: ", commentDto);
+
+            fetch(`/api/library/comments`, {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(commentDto)
+            }).then(response => {
+                console.log("Response = ", response);
+
+                if (response.ok) {
+                    window.location.replace(`/books/${bookId}`)
+                } else if (response.status >= 400 && response.status < 500) {
+                    return response.json();
+                }
+            }).then(body => {
+                console.log("Got client error ", body);
+                if (body.requestValidationErrors != null) {
+                    body.requestValidationErrors.forEach(err => {
+                        console.log(err.code, " -> ", err.text);
+                        if (err.code.endsWith("text")) {
+                            const titleError = document.getElementById("title_error");
+                            titleError.innerHTML = err.text;
+                        } else if (err.code.endsWith("readerId")) {
+                            const genresError = document.getElementById("reader_error");
+                            genresError.innerHTML = err.text;
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <a href="/books" th:text="#{back-home}">Домой</a>
+
+    <br/>
+
+    <h1 id="title" th:text="#{write-comment-for-book} + ': '">Написать комментарий для книги: ???????</h1>
+
+    <form id="create_form">
+        <div class="row">
+            <label for="reader_selector" th:text="#{select-book-reader} + ':'">Выберите читателя:</label>
+            <select id="reader_selector" ></select>
+            <div class="errors" id="reader_error" ></div>
+        </div>
+
+        <div class="row" >
+            <label for="comment_text_input" th:text="#{comment-text-title} + ':'">Comment text:</label>
+            <input id="comment_text_input" type="text" />
+            <div class="errors" id="title_error" ></div>
+        </div>
+
+        <div class="row">
+            <button type="button" th:onclick="'makeComment(' + ${book_id} + ')'" th:text="#{save-button-caption}">Сохранить</button>
+            <!--button type="button" th:onclick="'createComment(' + ${book_id} + ')'" th:text="#{create-button-caption}">Create</button-->
+            <a href="#" th:href="@{/books/{id}(id=${book_id})}">
+                <button type="button" th:text="#{cancel-button-caption}">Отменить</button>
+            </a>
+        </div>
+    </form>
+
+    <script th:text="'loadData(' + ${book_id} + ')'"></script>
+</body>
+</html>
