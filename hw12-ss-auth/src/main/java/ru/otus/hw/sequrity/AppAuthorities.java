@@ -14,7 +14,7 @@ public class AppAuthorities {
     /**
      * Написание комментариев. Редактировать/удалять свои комментарии
      */
-    public static final String WRITE_EDIT_COMMENTS = "commenter";
+    public static final String WRITE_EDIT_COMMENTS = "write_comments";
 
     /**
      * Добавлять/редактировать/удалять книги
@@ -24,5 +24,5 @@ public class AppAuthorities {
     /**
      * Удалять чужие комментарии
      */
-    public static final String MODERATE_ALL_COMMENTS = "comment_moderator";
+    public static final String MODERATE_ALL_COMMENTS = "moderate_comments";
 }

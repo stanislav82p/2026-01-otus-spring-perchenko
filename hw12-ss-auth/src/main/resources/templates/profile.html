@@ -50,6 +50,10 @@
         .table-footer {
             margin-top: 10px;
         }
+
+        .row {
+            margin-top: 24px;
+        }
     </style>
     <script>
         function renderHTML(user) {
@@ -107,6 +111,12 @@
                 <td id="user_authorities_cell">user_authorities</td>
             </tr>
         </table>
+
+        <div class="row">
+            <form action="/logout">
+                <button type="submit" th:text="#{action-logout}">Выйти</button>
+            </form>
+        </div>
 
     </div>
 
