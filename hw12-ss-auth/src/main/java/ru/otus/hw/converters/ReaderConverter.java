@@ -8,6 +8,6 @@ class ReaderConverter implements ModelConverter<ReaderDto> {
 
     @Override
     public String convertToString(ReaderDto model) {
-        return "Id: %d, FullName: %s".formatted(model.getId(), model.getFullName());
+        return "Id: %s, FullName: %s".formatted(model.getUsername(), model.getFullName());
     }
 }

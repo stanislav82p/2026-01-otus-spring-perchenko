@@ -8,6 +8,6 @@ import ru.otus.hw.models.entity.ReaderEntity;
  * Реализован только метод извлечения читателя, который используется в сервисе
  * комментариев.
  */
-public interface ReaderRepository extends JpaRepository<ReaderEntity, Long> {
+public interface ReaderRepository extends JpaRepository<ReaderEntity, String> {
 
 }

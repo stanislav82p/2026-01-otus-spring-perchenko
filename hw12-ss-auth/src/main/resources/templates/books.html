@@ -58,6 +58,13 @@
         .row {
             margin-top: 24px;
         }
+
+        .top-container {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
     </style>
 
     <script>
@@ -111,8 +118,17 @@
 </head>
 <body>
 
-<a href="/books?lang=ru">ru</a>
-<a href="/books?lang=en">en</a>
+<div class="top-container">
+    <div>
+        <a href="/books?lang=ru">ru</a>
+        <a href="/books?lang=en">en</a>
+    </div>
+    <div>
+        <a th:text="#{you-logged-in(${current_user_name})}" href="/profile">#</a>
+    </div>
+</div>
+
+
 
 <h1 th:text="#{title-library}">Библиотека</h1>
 

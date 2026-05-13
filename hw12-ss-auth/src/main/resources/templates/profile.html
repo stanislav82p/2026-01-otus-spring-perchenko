@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{title-profile}">Профиль</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters select,
+        .filters button {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* wrap_content */
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+        }
+
+        .table-footer {
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function renderHTML(user) {
+            document.getElementById("username_cell").innerText = user.username;
+            document.getElementById("first_name_cell").innerText = user.firstName;
+            document.getElementById("last_name_cell").innerText = user.lastName;
+            document.getElementById("full_name_cell").innerText = user.fullName;
+
+            const cell_authorities = document.getElementById("user_authorities_cell");
+            cell_authorities.innerHTML = '';
+            user.authorities.forEach(authority => {
+                cell_authorities.innerHTML += `
+                    <li>${authority}</li>
+                `;
+            });
+        }
+
+        function loadMyProfile() {
+            fetch('/api/library/readers/current')
+                .then(response => response.json())
+                .then(user => {
+                    console.log("Got current user: ", user);
+                    renderHTML(user)
+                });
+        }
+    </script>
+</head>
+<body>
+    <a href="/books" th:text="#{back-home}">Домой</a>
+    <br/>
+    <h1 th:text="#{title-library}">Библиотека</h1>
+
+    <div class="table-container">
+        <div class="table-title" th:text="#{title-profile}">Профиль</div>
+
+        <table id="profile_table">
+            <tr>
+                <td>username</td>
+                <td id="username_cell">username</td>
+            </tr>
+            <tr>
+                <td th:text="#{first_name}">Имя</td>
+                <td id="first_name_cell">first_name</td>
+            </tr>
+            <tr>
+                <td th:text="#{last_name}">Фамилия</td>
+                <td id="last_name_cell">last_name</td>
+            </tr>
+            <tr>
+                <td th:text="#{full_name}">Полное имя</td>
+                <td id="full_name_cell">full_name</td>
+            </tr>
+            <tr>
+                <td th:text="#{user_authorities}">Полномочия</td>
+                <td id="user_authorities_cell">user_authorities</td>
+            </tr>
+        </table>
+
+    </div>
+
+    <script>
+        loadMyProfile();
+    </script>
+</body>

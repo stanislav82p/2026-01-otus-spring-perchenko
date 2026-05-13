@@ -17,15 +17,12 @@ import ru.otus.hw.exceptions.BadHttpRequestParamsException;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.models.dto.CommentLightDto;
-import ru.otus.hw.models.entity.BookEntity;
-import ru.otus.hw.models.entity.ReaderEntity;
 import ru.otus.hw.rest.request.CommentCreationRequestDto;
 import ru.otus.hw.rest.request.CommentUpdateRequestDto;
 import ru.otus.hw.rest.response.CommentsDeleteResponseDto;
 import ru.otus.hw.rest.response.EntityUpdateResponseDto;
 import ru.otus.hw.services.CommentService;
 import ru.otus.hw.services.localization.LocalizedMessagesService;
-import ru.otus.hw.utils.EntityId;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,14 +66,14 @@ public class CommentApiConstroller {
     @GetMapping(path = "api/library/comments", params = {"book_id", "reader_id"})
     public ResponseEntity<List<CommentDto>> getAllCommentsForBookFromReader(
             @RequestParam(value = "book_id", defaultValue = "0") long bookId,
-            @RequestParam(value = "reader_id", defaultValue = "0") long readerId
+            @RequestParam(value = "reader_id", defaultValue = "") String readerId
     ) {
-        if (bookId > 0 && readerId > 0) {
+        if (!readerId.isEmpty() && (bookId > 0)) {
             var comments = commentService.findAllForBookFromReader(bookId, readerId);
             return ResponseEntity.ok().body(comments);
         } else {
             throw new BadHttpRequestParamsException(
-                    "Book ID %d and/or Reader ID %d is not acceptable".formatted(bookId, readerId),
+                    "Book ID %d and/or Reader ID %s is not acceptable".formatted(bookId, readerId),
                     messageService.getMessage("user_message_wrong_request")
             );
         }
@@ -90,14 +87,14 @@ public class CommentApiConstroller {
 
     @DeleteMapping(path = "api/library/comments", params = {"reader_id"})
     public CommentsDeleteResponseDto deleteAllCommentsFromReader(
-            @RequestParam(value = "reader_id", defaultValue = "0") long readerId
+            @RequestParam(value = "reader_id", defaultValue = "") String readerId
     ) {
-        if (readerId > 0) {
+        if (!readerId.isEmpty()) {
             int nDel = commentService.deleteAllFromReader(readerId);
             return new CommentsDeleteResponseDto(nDel);
         } else {
             throw new BadHttpRequestParamsException(
-                    "Reader ID %d is not acceptable".formatted(readerId),
+                    "Reader ID %s is not acceptable".formatted(readerId),
                     messageService.getMessage("user_message_wrong_request")
             );
         }
@@ -112,10 +109,7 @@ public class CommentApiConstroller {
             return getBadEntityResponse(bindingResult);
         }
 
-        EntityId<ReaderEntity> rId = EntityId.forValue(dto.getReaderId());
-        EntityId<BookEntity > bId  = EntityId.forValue(dto.getBookId());
-
-        var comment = commentService.createComment(rId, bId, dto.getText());
+        var comment = commentService.createComment(dto.getReaderId(), dto.getBookId(), dto.getText());
         var body = new EntityUpdateResponseDto<>(comment, null);
         return ResponseEntity.ok().body(body);
     }
@@ -136,7 +130,7 @@ public class CommentApiConstroller {
                 .findAny();
         if (origComment.isEmpty()) {
             throw new EntityNotFoundException(
-                    "У читателя с ID %d нет комментария с ID %d".formatted(dto.getReaderId(), commentId),
+                    "У читателя с ID %s нет комментария с ID %d".formatted(dto.getReaderId(), commentId),
                     messageService.getMessage("comment-not-found")
             );
         }

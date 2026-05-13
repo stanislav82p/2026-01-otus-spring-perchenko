@@ -7,10 +7,7 @@ import org.springframework.shell.standard.ShellOption;
 import ru.otus.hw.converters.ModelConverter;
 import ru.otus.hw.models.dto.CommentDto;
 import ru.otus.hw.models.dto.CommentLightDto;
-import ru.otus.hw.models.entity.BookEntity;
-import ru.otus.hw.models.entity.ReaderEntity;
 import ru.otus.hw.services.CommentService;
-import ru.otus.hw.utils.EntityId;
 
 import java.util.stream.Collectors;
 
@@ -52,7 +49,7 @@ public class CommentCommands {
             long bookId,
 
             @ShellOption(value = { "--reader-id", "-r" }, help = "ID читателя")
-            long readerId
+            String readerId
     ) {
 
         return commentService.findAllForBookFromReader(bookId, readerId).stream()
@@ -71,7 +68,7 @@ public class CommentCommands {
     @ShellMethod(value = "Delete all comments from reader", key = "delcommreader")
     public void deleteCommentsFromReader(
             @ShellOption(value = { "--reader-id", "-r" }, help = "ID комментария")
-            long readerId
+            String readerId
     ) {
         commentService.deleteAllFromReader(readerId);
     }
@@ -82,15 +79,12 @@ public class CommentCommands {
             long bookId,
 
             @ShellOption(value = { "--reader-id", "-r" }, help = "ID читателя")
-            long readerId,
+            String readerId,
 
             @ShellOption(value = { "--text", "-t" }, help = "текст комментария")
             String txt
     ) {
-        EntityId<ReaderEntity> rId = EntityId.forValue(readerId);
-        EntityId<BookEntity> bId = EntityId.forValue(bookId);
-
-        CommentDto comment = commentService.createComment(rId, bId, txt);
+        CommentDto comment = commentService.createComment(readerId, bookId, txt);
         return "Comment was created: %s".formatted(commentConverter.convertToString(comment));
     }
 

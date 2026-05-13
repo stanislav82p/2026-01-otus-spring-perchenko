@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class CommentCreationRequestDto {
 
     @Positive(message = "{reader-must-be-provided}")
-    private final long readerId;
+    private final String readerId;
 
     @Positive(message = "{book-id-must-be-provided}")
     private final long bookId;

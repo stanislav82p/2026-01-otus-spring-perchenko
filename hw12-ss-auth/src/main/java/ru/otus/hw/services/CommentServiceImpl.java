@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.dto.CommentLightDto;
-import ru.otus.hw.models.entity.BookEntity;
 import ru.otus.hw.models.entity.CommentEntity;
 import ru.otus.hw.models.entity.ReaderEntity;
 import ru.otus.hw.models.dto.CommentDto;
@@ -13,7 +12,6 @@ import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.ReaderRepository;
 import ru.otus.hw.services.localization.LocalizedMessagesService;
-import ru.otus.hw.utils.EntityId;
 
 import java.sql.Date;
 import java.util.List;
@@ -66,11 +64,11 @@ public class CommentServiceImpl implements CommentService {
         return commentRepo.findByBook(book.get()).stream().map(CommentDto::fromEntity).toList();
     }
 
-    public List<CommentDto> findAllFromReader(Long readerId) {
-        Optional<ReaderEntity> reader = readerRepo.findById(readerId);
+    public List<CommentDto> findAllFromReader(String username) {
+        Optional<ReaderEntity> reader = readerRepo.findById(username);
         if (reader.isEmpty()) {
             throw new EntityNotFoundException(
-                    "The reader with ID %s was not found".formatted(readerId),
+                    "The reader with ID %s was not found".formatted(username),
                     messageService.getMessage("reader-not-found")
             );
         }
@@ -80,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<CommentDto> findAllForBookFromReader(Long bookId, Long readerId) {
+    public List<CommentDto> findAllForBookFromReader(Long bookId, String username) {
         var book = bookRepo.findById(bookId).orElseThrow(
                 () -> new EntityNotFoundException(
                         "The book with ID %s was not found".formatted(bookId),
@@ -88,9 +86,9 @@ public class CommentServiceImpl implements CommentService {
                 )
         );
 
-        var reader = readerRepo.findById(readerId).orElseThrow(
+        var reader = readerRepo.findById(username).orElseThrow(
                 () -> new EntityNotFoundException(
-                        "The reader with ID %s was not found".formatted(readerId),
+                        "The reader with ID %s was not found".formatted(username),
                         messageService.getMessage("reader-not-found")
                 )
         );
@@ -109,23 +107,23 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public int deleteAllFromReader(Long readerId) {
-        return commentRepo.deleteByReader(ReaderEntity.forId(readerId));
+    public int deleteAllFromReader(String username) {
+        return commentRepo.deleteByReader(ReaderEntity.forId(username));
     }
 
     @Transactional
     @Override
-    public CommentDto createComment(EntityId<ReaderEntity> readerId, EntityId<BookEntity> bookId, String text) {
-        var book = bookRepo.findById(bookId.id).orElseThrow(
+    public CommentDto createComment(String username, long bookId, String text) {
+        var book = bookRepo.findById(bookId).orElseThrow(
                 () -> new EntityNotFoundException(
                         "The book with ID %d was not found".formatted(bookId),
                         messageService.getMessage("book-not-found")
                 )
         );
 
-        var reader = readerRepo.findById(readerId.id).orElseThrow(
+        var reader = readerRepo.findById(username).orElseThrow(
                 () -> new EntityNotFoundException(
-                        "The reader with ID %d was not found".formatted(readerId),
+                        "The reader with ID %s was not found".formatted(username),
                         messageService.getMessage("reader-not-found")
                 )
         );

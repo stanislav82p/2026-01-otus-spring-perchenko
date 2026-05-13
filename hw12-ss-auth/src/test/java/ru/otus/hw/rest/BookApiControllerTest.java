@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -17,6 +18,8 @@ import ru.otus.hw.models.entity.BookEntity;
 import ru.otus.hw.models.entity.GenreEntity;
 import ru.otus.hw.rest.response.ErrorResponseDto;
 import ru.otus.hw.rest.response.GetBooksResponseDto;
+import ru.otus.hw.sequrity.AppSecurityConfiguration;
+import ru.otus.hw.sequrity.UserRole;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.localization.LocalizedMessagesService;
@@ -25,15 +28,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @DisplayName("API-контроллер для книг")
 @WebMvcTest(BookApiController.class)
+@Import({AppSecurityConfiguration.class})
 public class BookApiControllerTest {
 
     @Autowired
@@ -84,7 +91,9 @@ public class BookApiControllerTest {
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=0&genre_id=0"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=0&genre_id=0").with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
@@ -109,7 +118,9 @@ public class BookApiControllerTest {
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=2&genre_id=0"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=2&genre_id=0").with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
@@ -136,7 +147,9 @@ public class BookApiControllerTest {
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=0&genre_id=3"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=0&genre_id=3").with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
@@ -163,7 +176,9 @@ public class BookApiControllerTest {
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=2&genre_id=3"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=2&genre_id=3").with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
@@ -178,7 +193,9 @@ public class BookApiControllerTest {
 
         String expectedJson = mapper.writeValueAsString(mBooks.get(0));
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/library/books/"+BOOK_ID_1))
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books/"+BOOK_ID_1).with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
     }
@@ -193,7 +210,9 @@ public class BookApiControllerTest {
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
-        mvc.perform(MockMvcRequestBuilders.get("/api/library/books/100500"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books/100500").with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(expectedJson));
     }
@@ -201,10 +220,28 @@ public class BookApiControllerTest {
     @DisplayName("Должен удалять книгу")
     @Test
     void shouldDeleteBook() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.delete("/api/library/books/"+BOOK_ID_1))
+        mvc.perform(MockMvcRequestBuilders.delete("/api/library/books/"+BOOK_ID_1).with(
+                        user("usr1").authorities(UserRole.MODERATOR.getGrantedAuthorities())
+                ))
                 .andExpect(status().isOk())
                 .andExpect(content().string(""));
 
         verify(bookService, times(1)).deleteById(eq(BOOK_ID_1));
+    }
+
+    @DisplayName("Должен возвращать 302 без авторизации и редирект на логин")
+    @Test
+    void shouldRedirectWhenNoAuth() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books?author_id=0&genre_id=0"))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "http://localhost/login"));
+
+        mvc.perform(MockMvcRequestBuilders.get("/api/library/books/"+BOOK_ID_1))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "http://localhost/login"));
+
+        mvc.perform(MockMvcRequestBuilders.delete("/api/library/books/"+BOOK_ID_1))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "http://localhost/login"));
     }
 }

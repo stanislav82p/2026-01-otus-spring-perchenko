@@ -26,3 +26,8 @@ spring:
   logging:
     level:
       ROOT: ERROR
+
+app:
+  security:
+    auth_key_password: asdf12345
+    auth_key_salt: sdklgfUiyW4ty497twrTt-ytw7etf8w09w4t

@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class CommentUpdateRequestDto {
 
     @Positive(message = "{reader-must-be-provided}")
-    private final long readerId;
+    private final String readerId;
 
     @NotBlank(message = "{comment-text-not-blank}")
     @Size(min = 5, max = 50, message = "{comment-text-expected-size}")

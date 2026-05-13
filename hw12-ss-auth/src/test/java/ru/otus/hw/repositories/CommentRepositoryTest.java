@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CommentRepositoryTest {
 
     private static final long BOOK_ID_2 = 2L;
-    private static final long READER_ID_1 = 1L;
+    private static final String READER_ID_1 = "usr1";
     private static final long COMMENT_ID_1 = 1L;
 
     @Autowired
@@ -81,7 +81,7 @@ public class CommentRepositoryTest {
     @Test
     void mustLoadAllCommentsFromReader() {
         var expectedComments = dbComments.stream()
-                .filter(it -> it.getReader().getId() == READER_ID_1).toList();
+                .filter(it -> READER_ID_1.equals(it.getReader().getUsername())).toList();
 
         var actualComments = commentRepo.findByReader(ReaderEntity.forId(READER_ID_1));
 
@@ -97,7 +97,7 @@ public class CommentRepositoryTest {
         ReaderEntity reader1 = em.find(ReaderEntity.class, READER_ID_1);
 
         var expectedComments = dbComments.stream()
-                .filter(it -> (it.getReader().getId() == READER_ID_1) && (it.getBook().getId() == BOOK_ID_2))
+                .filter(it -> READER_ID_1.equals(it.getReader().getUsername()) && (it.getBook().getId() == BOOK_ID_2))
                 .toList();
 
         var actualComments = commentRepo.findByReaderAndBook(reader1, book2);
@@ -174,7 +174,7 @@ public class CommentRepositoryTest {
         assertThat(em.find(CommentEntity.class, COMMENT_ID_1)).isNull();
     }
 
-    @DisplayName("Должен удалять комментарий")
+    @DisplayName("Должен удалять все комментарии от читателя")
     @Test
     void mustDeleteAllCommentsFromReader() {
         int nDeleted = commentRepo.deleteByReader(ReaderEntity.forId(READER_ID_1));
@@ -191,7 +191,7 @@ public class CommentRepositoryTest {
 
         assertThat(allComments.size()).isEqualTo(5);
 
-        var commentsForBook = allComments.stream().filter(it -> it.getReader().getId() == READER_ID_1).toList();
+        var commentsForBook = allComments.stream().filter(it -> READER_ID_1.equals(it.getReader().getUsername())).toList();
         assertThat(commentsForBook.size()).isEqualTo(0);
     }
 

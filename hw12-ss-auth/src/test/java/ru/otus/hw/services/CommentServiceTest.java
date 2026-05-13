@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CommentServiceTest {
 
     private static final long BOOK_ID_2 = 2L;
-    private static final long READER_ID_1 = 1L;
+    private static final String READER_ID_1 = "usr1";
 
     @Autowired
     private CommentService commService;
@@ -65,16 +65,14 @@ public class CommentServiceTest {
                 .allMatch(it -> it.getBook().getAuthor() != null)
                 .allMatch(it -> !it.getBook().getGenres().isEmpty())
                 .allMatch(it ->
-                ((it.getBook().getId() == BOOK_ID_2) && (it.getReader().getId() == READER_ID_1)));
+                ((it.getBook().getId() == BOOK_ID_2) && READER_ID_1.equals(it.getReader().getUsername())));
     }
 
     @DisplayName("Должен создавать новый комментарий")
     @DirtiesContext
     @Test
     void mustCreateComment() {
-        EntityId<ReaderEntity> rId = EntityId.forValue(READER_ID_1);
-        EntityId<BookEntity> bId = EntityId.forValue(BOOK_ID_2);
-        CommentDto createdComm = commService.createComment(rId, bId, "Comment 100500");
+        CommentDto createdComm = commService.createComment(READER_ID_1, BOOK_ID_2, "Comment 100500");
 
         assertThat(createdComm.getId()).isGreaterThan(0);
 
@@ -95,6 +93,6 @@ public class CommentServiceTest {
         List<CommentLightDto> comments = commService.findAll();
 
         assertThat(comments.size()).isEqualTo(5);
-        assertThat(comments).allMatch(it -> it.getReader().getId() != READER_ID_1);
+        assertThat(comments).allMatch(it -> !READER_ID_1.equals(it.getReader().getUsername()));
     }
 }
