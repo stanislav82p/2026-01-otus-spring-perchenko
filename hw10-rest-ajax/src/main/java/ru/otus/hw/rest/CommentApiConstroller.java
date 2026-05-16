@@ -51,9 +51,9 @@ public class CommentApiConstroller {
         return commentService.findById(commentId);
     }
 
-    @GetMapping(path = "api/library/comments", params = {"book_id"})
+    @GetMapping(path = "api/library/book/{book_id}/comments")
     public ResponseEntity<List<CommentDto>> getAllCommentsForBook(
-            @RequestParam(value = "book_id", defaultValue = "0") long bookId
+            @PathVariable("book_id") long bookId
     ) {
         if (bookId > 0) {
             var comments = commentService.findAllForBook(bookId);
@@ -66,9 +66,9 @@ public class CommentApiConstroller {
         }
     }
 
-    @GetMapping(path = "api/library/comments", params = {"book_id", "reader_id"})
+    @GetMapping(path = "api/library/book/{book_id}/comments", params = {"reader_id"})
     public ResponseEntity<List<CommentDto>> getAllCommentsForBookFromReader(
-            @RequestParam(value = "book_id", defaultValue = "0") long bookId,
+            @PathVariable(value = "book_id") long bookId,
             @RequestParam(value = "reader_id", defaultValue = "0") long readerId
     ) {
         if (bookId > 0 && readerId > 0) {
