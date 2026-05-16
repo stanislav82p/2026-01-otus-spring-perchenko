@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{create-the-book}">Добавить книгу</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters select,
+        .filters button {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto; /* wrap_content */
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+        }
+
+        .table-footer {
+            margin-top: 10px;
+        }
+
+        .errors {
+            color: red;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function renderHTML(authors, genres) {
+
+            const titleInput = document.getElementById("book_title_input");
+            const authorSelector = document.getElementById("book_author_select");
+            const genreSelector  = document.getElementById("book_genre_select");
+
+            authors.forEach(author => {
+                let opt = document.createElement("option");
+                opt.value = author.id;
+                opt.textContent = author.fullName;
+                opt.selected = false;
+                authorSelector.appendChild(opt);
+            });
+
+            genres.forEach(genre => {
+                let opt = document.createElement("option");
+                opt.value = genre.id;
+                opt.textContent = genre.name;
+                opt.selected = false;
+                genreSelector.appendChild(opt);
+            });
+        }
+
+        function loadData() {
+            let callAuthors = fetch('/api/library/authors');
+            let callGenres  = fetch('/api/library/genres');
+
+            Promise.all([callAuthors, callGenres])
+                .then(values => Promise.all(values.map(value => value.json())))
+                .then(data => {
+                    const authors = data[0];
+                    const genres  = data[1];
+
+                    console.log("Got Authors: ", authors.length, ", and Genres: ", genres.length);
+
+                    renderHTML(authors, genres);
+                });
+        }
+
+        function createBook() {
+            console.log("Start creating book");
+
+            const titleInput = document.getElementById("book_title_input");
+            const authorSelector = document.getElementById("book_author_select");
+            const genreSelector  = document.getElementById("book_genre_select");
+
+            const bookDto = {
+                bookTitle: titleInput.value,
+                authorId: authorSelector.value,
+                genreIds: Array.from(genreSelector.selectedOptions).map(opt => opt.value),
+            };
+
+            console.log("Book DTO: ", bookDto);
+
+            fetch(`/api/library/books`, {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookDto)
+            }).then(response => {
+                console.log("Response = ", response);
+
+                if (response.ok) {
+                    window.location.replace(`/books`)
+                } else if (response.status >= 400 && response.status < 500) {
+                    return response.json();
+                }
+            }).then(body => {
+                console.log("Got client error ", body);
+                if (body.requestValidationErrors != null) {
+                    body.requestValidationErrors.forEach(err => {
+                        console.log(err.code, " -> ", err.text);
+                        if (err.code.endsWith("bookTitle")) {
+                            const titleError = document.getElementById("title_error");
+                            titleError.innerHTML = err.text;
+                        } else if (err.code.endsWith("genreIds")) {
+                            const genresError = document.getElementById("genres_error");
+                            genresError.innerHTML = err.text;
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <a href="/books" th:text="#{back-home}">Домой</a>
+    <br/>
+    <h1 th:text="#{create-the-book}">Создать книгу</h1>
+
+    <form id="edit_form">
+        <div class="row" >
+            <label for="book_title_input" th:text="#{input-book-title} + ':'">Название книги:</label>
+            <input id="book_title_input" type="text" />
+            <div class="errors" id="title_error" ></div>
+        </div>
+
+        <div class="row">
+            <label for="book_author_select" th:text="#{input-book-author} + ':'">Автор книги:</label>
+            <select id="book_author_select" ></select>
+        </div>
+
+        <div class="row">
+            <label for="book_genre_select" th:text="#{input-book-genres} + ':'">Жанры книги:</label>
+            <select id="book_genre_select" multiple></select>
+            <div class="errors" id="genres_error" ></div>
+        </div>
+
+        <div class="row">
+            <button type="button" onclick="createBook()" th:text="#{save-button-caption}">Сохранить</button>
+            <a href="/books">
+                <button type="button" th:text="#{cancel-button-caption}">Отменить</button>
+            </a>
+        </div>
+    </form>
+
+    <script>
+        loadData()
+    </script>
+
+</body>
+</html>
