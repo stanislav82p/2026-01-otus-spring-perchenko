@@ -87,7 +87,7 @@
             console.log("Loading data for Book ID: ", bookId);
 
             let callBook = fetch(`/api/library/books/${bookId}`);
-            let callComments = fetch(`/api/library/comments?book_id=${bookId}`);
+            let callComments = fetch(`/api/library/book/${bookId}/comments`);
 
             Promise.all([callBook, callComments])
                 .then(values => Promise.all(values.map(value => value.json())))

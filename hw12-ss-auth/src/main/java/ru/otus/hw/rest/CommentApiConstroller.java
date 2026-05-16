@@ -3,7 +3,9 @@ package ru.otus.hw.rest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,7 @@ import ru.otus.hw.rest.request.CommentUpdateRequestDto;
 import ru.otus.hw.rest.response.CommentsDeleteResponseDto;
 import ru.otus.hw.rest.response.EntityUpdateResponseDto;
 import ru.otus.hw.services.CommentService;
+import ru.otus.hw.services.ReaderService;
 import ru.otus.hw.services.localization.LocalizedMessagesService;
 
 import java.util.List;
@@ -34,12 +37,18 @@ public class CommentApiConstroller {
 
     private final CommentService commentService;
 
+    private final ReaderService readerService;
 
     private final LocalizedMessagesService messageService;
 
     @Autowired
-    public CommentApiConstroller(CommentService commentService, LocalizedMessagesService messageService) {
+    public CommentApiConstroller(
+            CommentService commentService,
+            ReaderService readerService,
+            LocalizedMessagesService messageService
+    ) {
         this.commentService = commentService;
+        this.readerService = readerService;
         this.messageService = messageService;
     }
 
@@ -48,9 +57,9 @@ public class CommentApiConstroller {
         return commentService.findById(commentId);
     }
 
-    @GetMapping(path = "api/library/comments", params = {"book_id"})
+    @GetMapping(path = "api/library/book/{book_id}/comments")
     public ResponseEntity<List<CommentDto>> getAllCommentsForBook(
-            @RequestParam(value = "book_id", defaultValue = "0") long bookId
+            @PathVariable("book_id") long bookId
     ) {
         if (bookId > 0) {
             var comments = commentService.findAllForBook(bookId);
@@ -63,9 +72,9 @@ public class CommentApiConstroller {
         }
     }
 
-    @GetMapping(path = "api/library/comments", params = {"book_id", "reader_id"})
+    @GetMapping(path = "api/library/book/{book_id}/comments", params = {"reader_id"})
     public ResponseEntity<List<CommentDto>> getAllCommentsForBookFromReader(
-            @RequestParam(value = "book_id", defaultValue = "0") long bookId,
+            @PathVariable(value = "book_id") long bookId,
             @RequestParam(value = "reader_id", defaultValue = "") String readerId
     ) {
         if (!readerId.isEmpty() && (bookId > 0)) {
@@ -109,7 +118,12 @@ public class CommentApiConstroller {
             return getBadEntityResponse(bindingResult);
         }
 
-        var comment = commentService.createComment(dto.getReaderId(), dto.getBookId(), dto.getText());
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        var reader = readerService.getByUsername(auth.getName());
+        var comment = commentService.createComment(reader.getUsername(), dto.getBookId(), dto.getText());
         var body = new EntityUpdateResponseDto<>(comment, null);
         return ResponseEntity.ok().body(body);
     }

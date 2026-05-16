@@ -61,51 +61,41 @@
     </style>
 
     <script>
-        function renderHTML(book, readers) {
+        function renderHTML(book, reader) {
             document.getElementById("title").innerHTML += book.title;
-
-            const readerSelector = document.getElementById("reader_selector");
-
-            let noSel = document.createElement("option");
-                noSel.value = 0;
-                noSel.textContent = "not selected";
-                noSel.selected = true;
-                readerSelector.appendChild(noSel);
-
-            readers.forEach(reader => {
-                let opt = document.createElement("option");
-                opt.value = reader.id;
-                opt.textContent = reader.fullName;
-                opt.selected = false;
-                readerSelector.appendChild(opt);
-            });
+            document.getElementById("reader_title").innerHTML += reader.fullName;
         }
 
         function loadData(bookId) {
             console.log("Start loading data for bookId = ", bookId);
             let callBook = fetch(`/api/library/books/${bookId}`);
-            let callReaders  = fetch('/api/library/readers');
+            let callReader  = fetch('/api/library/readers/current');
 
-            Promise.all([callBook, callReaders])
+            Promise.all([callBook, callReader])
                 .then(values => Promise.all(values.map(value => value.json())))
                 .then(data => {
                     const book = data[0];
-                    const readers  = data[1];
+                    const reader  = data[1];
 
-                    console.log("Got book: ", book, ", and Readers: ", readers.length);
+                    console.log("Got book: ", book, ", and Reader: ", reader);
 
-                    renderHTML(book, readers);
+                    renderHTML(book, reader);
                 });
         }
+
+
+
+
+
+
+
 
         function makeComment(bookId) {
             console.log("Start create comment for bookId = ", bookId);
 
             const textInput = document.getElementById("comment_text_input");
-            const readerInput = document.getElementById("reader_selector");
 
             const commentDto = {
-                readerId: readerInput.value,
                 bookId: bookId,
                 text: textInput.value,
             };
@@ -154,9 +144,7 @@
 
     <form id="create_form">
         <div class="row">
-            <label for="reader_selector" th:text="#{select-book-reader} + ':'">Выберите читателя:</label>
-            <select id="reader_selector" ></select>
-            <div class="errors" id="reader_error" ></div>
+            <h2 id="reader_title" th:text="#{write-comment-from-reader} + ': '">Написать комментарий от читателя: ????? ?????</h2>
         </div>
 
         <div class="row" >
